@@ -1,0 +1,52 @@
+<div class="dashboard-page" *ngIf="!loading; else loadingTpl">
+
+  <!-- Profile Card -->
+  <div class="profile-banner" *ngIf="employee">
+    <div class="profile-avatar">{{ employee.fullName.charAt(0) }}</div>
+    <div class="profile-info">
+      <h2>{{ employee.fullName }}</h2>
+      <p>{{ employee.employeeCode }} · {{ employee.designation }} · {{ employee.department }}</p>
+      <p-tag [value]="employee.status" severity="success"></p-tag>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card blue">
+      <i class="pi pi-wallet stat-icon"></i>
+      <div class="stat-body">
+        <div class="stat-value">₹{{ payslip?.netSalary | number:'1.0-0' }}</div>
+        <div class="stat-label">Net Salary (This Month)</div>
+      </div>
+    </div>
+    <div class="stat-card green">
+      <i class="pi pi-star stat-icon"></i>
+      <div class="stat-body">
+        <div class="stat-value">{{ lastRating || '—' }}/5</div>
+        <div class="stat-label">Last Performance</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance Card -->
+  <p-card header="Today's Attendance" styleClass="mb-4">
+    <div class="attendance-actions">
+      <div class="attendance-status" *ngIf="todayRecord">
+        <p>Check In: <strong>{{ todayRecord.checkInTime || '—' }}</strong></p>
+        <p>Check Out: <strong>{{ todayRecord.checkOutTime || '—' }}</strong></p>
+        <p *ngIf="todayRecord.workingHours">Working Hours: <strong>{{ todayRecord.workingHours | number:'1.1-1' }}h</strong></p>
+      </div>
+      <div class="attendance-status" *ngIf="!todayRecord">
+        <p class="text-muted">Not checked in yet today</p>
+      </div>
+      <div class="attendance-btns">
+        <p-button label="Check In" icon="pi pi-sign-in" severity="success" [loading]="actionLoading" [disabled]="checkedIn" (onClick)="checkIn()" styleClass="mr-2"></p-button>
+        <p-button label="Check Out" icon="pi pi-sign-out" severity="warn" [loading]="actionLoading" [disabled]="!checkedIn || checkedOut" (onClick)="checkOut()"></p-button>
+      </div>
+    </div>
+  </p-card>
+
+</div>
+<ng-template #loadingTpl>
+  <div class="loading-state"><p-progressSpinner></p-progressSpinner></div>
+</ng-template>

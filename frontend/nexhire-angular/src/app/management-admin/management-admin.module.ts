@@ -1,16 +1,24 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { AvatarModule } from 'primeng/avatar';
-import { ManagementAdminComponent } from './dashboard/management-admin.component';
+import { SharedModule } from '../shared/shared.module';
 
-const routes: Routes = [
-  { path: '', component: ManagementAdminComponent }
-];
+import { ManagementAdminComponent } from './dashboard/management-admin.component';
+import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
+import { EmployeeListComponent } from './employee-list/employee-list.component';
+import { PayrollManagementComponent } from './payroll-management/payroll-management.component';
+
+const routes: Routes = [{
+  path: '',
+  component: ManagementAdminComponent,
+  children: [
+    { path: '', component: AdminDashboardComponent },
+    { path: 'employees', component: EmployeeListComponent },
+    { path: 'payroll', component: PayrollManagementComponent }
+  ]
+}];
 
 @NgModule({
-  declarations: [ManagementAdminComponent],
-  imports: [CommonModule, RouterModule.forChild(routes), ButtonModule, AvatarModule]
+  declarations: [ManagementAdminComponent, AdminDashboardComponent, EmployeeListComponent, PayrollManagementComponent],
+  imports: [SharedModule, RouterModule.forChild(routes)]
 })
 export class ManagementAdminModule {}

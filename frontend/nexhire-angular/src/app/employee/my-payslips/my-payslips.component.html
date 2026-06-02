@@ -1,0 +1,41 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>My Payslips</h2>
+    <div class="header-controls">
+      <p-select [(ngModel)]="month" [options]="months" optionLabel="label" optionValue="value" (ngModelChange)="load()"></p-select>
+      <p-select [(ngModel)]="year" [options]="years" (ngModelChange)="load()" styleClass="ml-2"></p-select>
+    </div>
+  </div>
+
+  <div *ngIf="loading"><p-progressSpinner></p-progressSpinner></div>
+  <div *ngIf="notFound && !loading" class="empty-state">No payslip found for {{ monthName(month) }} {{ year }}</div>
+
+  <div *ngIf="payslip && !loading" class="payslip-card">
+    <div class="payslip-header">
+      <div>
+        <h3>{{ payslip.employeeName }}</h3>
+        <p>{{ payslip.employeeCode }} · {{ payslip.department }}</p>
+      </div>
+      <div class="payslip-period">{{ monthName(payslip.month) }} {{ payslip.year }}</div>
+    </div>
+
+    <div class="payslip-body">
+      <div class="payslip-section">
+        <h4>Earnings</h4>
+        <div class="payslip-row"><span>Basic Salary</span><span>₹{{ payslip.baseSalary | number }}</span></div>
+        <div class="payslip-row"><span>HRA (40%)</span><span>₹{{ payslip.hra | number }}</span></div>
+        <div class="payslip-row"><span>Travel Allowance (10%)</span><span>₹{{ payslip.ta | number }}</span></div>
+        <div class="payslip-row total"><span>Gross Salary</span><span>₹{{ payslip.grossSalary | number }}</span></div>
+      </div>
+      <div class="payslip-section">
+        <h4>Deductions</h4>
+        <div class="payslip-row text-danger"><span>Provident Fund (12%)</span><span>-₹{{ payslip.pf | number }}</span></div>
+        <div class="payslip-row text-danger"><span>Income Tax (10%)</span><span>-₹{{ payslip.tax | number }}</span></div>
+      </div>
+    </div>
+    <div class="payslip-footer">
+      <span>Net Salary</span>
+      <span class="net-amount">₹{{ payslip.netSalary | number }}</span>
+    </div>
+  </div>
+</div>

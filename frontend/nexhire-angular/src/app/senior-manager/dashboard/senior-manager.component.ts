@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { AuthResponse } from '../../core/models/auth.model';
-import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-senior-manager',
@@ -12,20 +11,14 @@ import { MenuItem } from 'primeng/api';
 export class SeniorManagerComponent implements OnInit {
   user: AuthResponse | null = null;
 
-  menuItems: MenuItem[] = [
-    { label: 'Dashboard',   icon: 'pi pi-home',      routerLink: '/manager' },
-    { label: 'My Team',     icon: 'pi pi-users',     routerLink: '/manager/team' },
-    { label: 'Performance', icon: 'pi pi-chart-line', routerLink: '/manager/performance' },
-    { label: 'Approvals',   icon: 'pi pi-check-circle', routerLink: '/manager/approvals' }
+  menuItems = [
+    { label: 'Dashboard',   icon: 'pi pi-home',        link: '/manager' },
+    { label: 'My Team',     icon: 'pi pi-users',       link: '/manager/team' },
+    { label: 'Leave Approvals', icon: 'pi pi-check-circle', link: '/manager/leaves' },
+    { label: 'Performance', icon: 'pi pi-star',        link: '/manager/performance' }
   ];
 
   constructor(private authService: AuthService) {}
-
-  ngOnInit(): void {
-    this.user = this.authService.getCurrentUser();
-  }
-
-  logout(): void {
-    this.authService.logout();
-  }
+  ngOnInit(): void { this.user = this.authService.getCurrentUser(); }
+  logout(): void { this.authService.logout(); }
 }

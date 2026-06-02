@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { AuthResponse } from '../../core/models/auth.model';
-import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-management-admin',
@@ -11,23 +10,16 @@ import { MenuItem } from 'primeng/api';
 })
 export class ManagementAdminComponent implements OnInit {
   user: AuthResponse | null = null;
-  sidebarVisible = true;
 
-  menuItems: MenuItem[] = [
-    { label: 'Dashboard',   icon: 'pi pi-home',       routerLink: '/admin' },
-    { label: 'Employees',   icon: 'pi pi-users',      routerLink: '/admin/employees' },
-    { label: 'Departments', icon: 'pi pi-building',   routerLink: '/admin/departments' },
-    { label: 'Reports',     icon: 'pi pi-chart-bar',  routerLink: '/admin/reports' },
-    { label: 'Settings',    icon: 'pi pi-cog',        routerLink: '/admin/settings' }
+  menuItems = [
+    { label: 'Dashboard',   icon: 'pi pi-home',       link: '/admin' },
+    { label: 'Employees',   icon: 'pi pi-users',      link: '/admin/employees' },
+    { label: 'Payroll',     icon: 'pi pi-wallet',     link: '/admin/payroll' },
+    { label: 'Reports',     icon: 'pi pi-chart-bar',  link: '/admin/reports' },
+    { label: 'Settings',    icon: 'pi pi-cog',        link: '/admin/settings' }
   ];
 
   constructor(private authService: AuthService) {}
-
-  ngOnInit(): void {
-    this.user = this.authService.getCurrentUser();
-  }
-
-  logout(): void {
-    this.authService.logout();
-  }
+  ngOnInit(): void { this.user = this.authService.getCurrentUser(); }
+  logout(): void { this.authService.logout(); }
 }

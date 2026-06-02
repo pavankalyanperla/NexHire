@@ -1,16 +1,28 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { AvatarModule } from 'primeng/avatar';
-import { EmployeeComponent } from './dashboard/employee.component';
+import { SharedModule } from '../shared/shared.module';
 
-const routes: Routes = [
-  { path: '', component: EmployeeComponent }
-];
+import { EmployeeComponent } from './dashboard/employee.component';
+import { EmployeeDashboardComponent } from './employee-dashboard/employee-dashboard.component';
+import { MyAttendanceComponent } from './my-attendance/my-attendance.component';
+import { MyPayslipsComponent } from './my-payslips/my-payslips.component';
+import { MyLeavesComponent } from './my-leaves/my-leaves.component';
+import { MyPerformanceComponent } from './my-performance/my-performance.component';
+
+const routes: Routes = [{
+  path: '',
+  component: EmployeeComponent,
+  children: [
+    { path: '', component: EmployeeDashboardComponent },
+    { path: 'attendance', component: MyAttendanceComponent },
+    { path: 'payslips', component: MyPayslipsComponent },
+    { path: 'leaves', component: MyLeavesComponent },
+    { path: 'performance', component: MyPerformanceComponent }
+  ]
+}];
 
 @NgModule({
-  declarations: [EmployeeComponent],
-  imports: [CommonModule, RouterModule.forChild(routes), ButtonModule, AvatarModule]
+  declarations: [EmployeeComponent, EmployeeDashboardComponent, MyAttendanceComponent, MyPayslipsComponent, MyLeavesComponent, MyPerformanceComponent],
+  imports: [SharedModule, RouterModule.forChild(routes)]
 })
 export class EmployeeModule {}

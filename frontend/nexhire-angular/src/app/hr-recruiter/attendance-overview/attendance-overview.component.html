@@ -1,0 +1,33 @@
+<div class="page-container">
+  <div *ngIf="loading"><p-progressSpinner></p-progressSpinner></div>
+  <ng-container *ngIf="!loading">
+    <p-card header="Today's Attendance" styleClass="mb-4">
+      <p-table [value]="todayAttendance">
+        <ng-template pTemplate="header"><tr><th>Employee</th><th>Code</th><th>Check In</th><th>Check Out</th><th>Hours</th><th>Status</th></tr></ng-template>
+        <ng-template pTemplate="body" let-a>
+          <tr>
+            <td>{{ a.employeeName }}</td><td>{{ a.employeeCode }}</td>
+            <td>{{ a.checkInTime || '—' }}</td><td>{{ a.checkOutTime || '—' }}</td>
+            <td>{{ a.workingHours ? (a.workingHours | number:'1.1-1') + 'h' : '—' }}</td>
+            <td><p-tag [value]="a.status" [severity]="a.status==='Present'?'success':'warn'"></p-tag></td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage"><tr><td colspan="6" class="text-center">No check-ins today yet</td></tr></ng-template>
+      </p-table>
+    </p-card>
+    <p-card header="Monthly Summary">
+      <p-table [value]="monthlySummary">
+        <ng-template pTemplate="header"><tr><th>Employee</th><th>Present</th><th>Absent</th><th>Leaves</th><th>Total Hours</th></tr></ng-template>
+        <ng-template pTemplate="body" let-s>
+          <tr>
+            <td>{{ s.employeeName }} ({{ s.employeeCode }})</td>
+            <td><p-tag value="{{ s.presentDays }}d" severity="success"></p-tag></td>
+            <td><p-tag value="{{ s.absentDays }}d" severity="danger"></p-tag></td>
+            <td><p-tag value="{{ s.leaveDays }}d" severity="warn"></p-tag></td>
+            <td>{{ s.totalHours | number:'1.1-1' }}h</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </ng-container>
+</div>

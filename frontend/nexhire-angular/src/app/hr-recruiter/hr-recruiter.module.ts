@@ -1,16 +1,24 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { AvatarModule } from 'primeng/avatar';
-import { HRRecruiterComponent } from './dashboard/hr-recruiter.component';
+import { SharedModule } from '../shared/shared.module';
 
-const routes: Routes = [
-  { path: '', component: HRRecruiterComponent }
-];
+import { HRRecruiterComponent } from './dashboard/hr-recruiter.component';
+import { HRDashboardComponent } from './hr-dashboard/hr-dashboard.component';
+import { EmployeeManagementComponent } from './employee-management/employee-management.component';
+import { AttendanceOverviewComponent } from './attendance-overview/attendance-overview.component';
+
+const routes: Routes = [{
+  path: '',
+  component: HRRecruiterComponent,
+  children: [
+    { path: '', component: HRDashboardComponent },
+    { path: 'employees', component: EmployeeManagementComponent },
+    { path: 'attendance', component: AttendanceOverviewComponent }
+  ]
+}];
 
 @NgModule({
-  declarations: [HRRecruiterComponent],
-  imports: [CommonModule, RouterModule.forChild(routes), ButtonModule, AvatarModule]
+  declarations: [HRRecruiterComponent, HRDashboardComponent, EmployeeManagementComponent, AttendanceOverviewComponent],
+  imports: [SharedModule, RouterModule.forChild(routes)]
 })
 export class HRRecruiterModule {}

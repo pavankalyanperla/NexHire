@@ -1,0 +1,40 @@
+<div class="page-container">
+  <h2>Performance Reviews</h2>
+  <p-table [value]="reviews" [loading]="loading">
+    <ng-template pTemplate="header">
+      <tr><th>Employee</th><th>Department</th><th>Month/Year</th><th>Self Rating</th><th>Self Comments</th><th>Goals</th><th>Action</th></tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-r>
+      <tr>
+        <td><strong>{{ r.employeeName }}</strong></td>
+        <td>{{ r.department }}</td>
+        <td>{{ r.month }}/{{ r.year }}</td>
+        <td><p-rating [(ngModel)]="r.selfRating" [readonly]="true"></p-rating></td>
+        <td>{{ r.selfComments }}</td>
+        <td>{{ r.goals }}</td>
+        <td><p-button label="Review" icon="pi pi-star" severity="warn" size="small" (onClick)="openReview(r)"></p-button></td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage"><tr><td colspan="7" class="text-center">No pending reviews</td></tr></ng-template>
+  </p-table>
+
+  <p-dialog [(visible)]="showDialog" header="Submit Manager Review" [modal]="true" [style]="{ width: '420px' }">
+    <div *ngIf="selected" class="form-grid">
+      <p><strong>Employee:</strong> {{ selected.employeeName }}</p>
+      <p><strong>Self Rating:</strong> {{ selected.selfRating }}/5</p>
+      <p><strong>Self Comments:</strong> {{ selected.selfComments }}</p>
+      <div class="field">
+        <label>Your Rating</label>
+        <p-rating [(ngModel)]="managerRating"></p-rating>
+      </div>
+      <div class="field">
+        <label>Your Comments</label>
+        <textarea pTextarea [(ngModel)]="managerComments" rows="3" class="w-full"></textarea>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <p-button label="Cancel" severity="secondary" (onClick)="showDialog=false"></p-button>
+      <p-button label="Submit Review" (onClick)="submit()"></p-button>
+    </ng-template>
+  </p-dialog>
+</div>

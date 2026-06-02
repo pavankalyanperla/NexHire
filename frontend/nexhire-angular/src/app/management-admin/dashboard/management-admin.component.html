@@ -1,49 +1,27 @@
 <div class="portal-layout">
-  <!-- Top Navbar -->
   <nav class="portal-navbar">
     <div class="navbar-left">
       <i class="pi pi-building app-logo-icon"></i>
       <span class="app-logo-text">NexHire</span>
     </div>
     <div class="navbar-right">
-      <p-avatar
-        [label]="user?.fullName?.charAt(0) || 'A'"
-        styleClass="mr-2"
-        shape="circle"
-        [style]="{ 'background-color': '#6366f1', 'color': '#fff' }"
-      ></p-avatar>
+      <p-avatar [label]="user?.fullName?.charAt(0) || 'A'" shape="circle" [style]="{ 'background-color': '#6366f1', 'color': '#fff' }"></p-avatar>
       <span class="user-name">{{ user?.fullName }}</span>
       <span class="role-badge admin-badge">Management Admin</span>
-      <p-button
-        icon="pi pi-sign-out"
-        label="Logout"
-        severity="secondary"
-        [text]="true"
-        (onClick)="logout()"
-        styleClass="ml-2"
-      ></p-button>
+      <p-button icon="pi pi-sign-out" label="Logout" severity="secondary" [text]="true" (onClick)="logout()"></p-button>
     </div>
   </nav>
-
   <div class="portal-body">
-    <!-- Sidebar -->
     <aside class="portal-sidebar">
       <ul class="sidebar-menu">
         <li *ngFor="let item of menuItems" class="sidebar-item">
-          <a [routerLink]="item.routerLink" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.routerLink === '/admin' }">
-            <i [class]="item.icon"></i>
-            <span>{{ item.label }}</span>
+          <a [routerLink]="item.link" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.link === '/admin' }">
+            <i [class]="item.icon"></i><span>{{ item.label }}</span>
           </a>
         </li>
       </ul>
     </aside>
-
-    <!-- Main Content -->
     <main class="portal-main">
-      <div class="welcome-card">
-        <h2>Welcome back, {{ user?.fullName }}!</h2>
-        <p>You're logged in as <strong>Management Admin</strong> — {{ user?.department }}</p>
-      </div>
       <router-outlet></router-outlet>
     </main>
   </div>

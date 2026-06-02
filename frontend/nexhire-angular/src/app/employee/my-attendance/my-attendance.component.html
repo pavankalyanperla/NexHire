@@ -1,0 +1,27 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>My Attendance</h2>
+    <div class="header-controls">
+      <p-select [(ngModel)]="month" [options]="months" optionLabel="label" optionValue="value" (ngModelChange)="load()"></p-select>
+      <p-select [(ngModel)]="year" [options]="years" (ngModelChange)="load()" styleClass="ml-2"></p-select>
+    </div>
+  </div>
+  <div class="stats-grid mini">
+    <div class="stat-card green"><div class="stat-body"><div class="stat-value">{{ presentDays }}</div><div class="stat-label">Present</div></div></div>
+    <div class="stat-card orange"><div class="stat-body"><div class="stat-value">{{ leaveDays }}</div><div class="stat-label">Leaves</div></div></div>
+    <div class="stat-card red"><div class="stat-body"><div class="stat-value">{{ absentDays }}</div><div class="stat-label">Absent</div></div></div>
+  </div>
+  <p-table [value]="records" [loading]="loading" stripedRows>
+    <ng-template pTemplate="header"><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Hours</th><th>Status</th></tr></ng-template>
+    <ng-template pTemplate="body" let-r>
+      <tr>
+        <td>{{ r.date | date:'EEE, dd MMM' }}</td>
+        <td>{{ r.checkInTime || '—' }}</td>
+        <td>{{ r.checkOutTime || '—' }}</td>
+        <td>{{ r.workingHours ? (r.workingHours | number:'1.1-1') + 'h' : '—' }}</td>
+        <td><p-tag [value]="r.status" [severity]="getSeverity(r.status)"></p-tag></td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage"><tr><td colspan="5" class="text-center">No records for this month</td></tr></ng-template>
+  </p-table>
+</div>

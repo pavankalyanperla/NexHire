@@ -1,0 +1,22 @@
+<div class="dashboard-page">
+  <div *ngIf="loading"><p-progressSpinner></p-progressSpinner></div>
+  <ng-container *ngIf="!loading">
+    <div class="stats-grid">
+      <div class="stat-card blue"><i class="pi pi-users stat-icon"></i><div class="stat-body"><div class="stat-value">{{ employees.length }}</div><div class="stat-label">Total Employees</div></div></div>
+      <div class="stat-card green"><i class="pi pi-user-plus stat-icon"></i><div class="stat-body"><div class="stat-value">{{ newThisMonth }}</div><div class="stat-label">New This Month</div></div></div>
+      <div class="stat-card orange"><i class="pi pi-clock stat-icon"></i><div class="stat-body"><div class="stat-value">{{ pendingLeaves.length }}</div><div class="stat-label">Open Leaves</div></div></div>
+      <div class="stat-card purple"><i class="pi pi-building stat-icon"></i><div class="stat-body"><div class="stat-value">4</div><div class="stat-label">Departments</div></div></div>
+    </div>
+    <p-card header="Recent Employees">
+      <p-table [value]="employees.slice(0,5)">
+        <ng-template pTemplate="header"><tr><th>Code</th><th>Name</th><th>Department</th><th>Status</th></tr></ng-template>
+        <ng-template pTemplate="body" let-e>
+          <tr>
+            <td>{{ e.employeeCode }}</td><td>{{ e.fullName }}</td><td>{{ e.department }}</td>
+            <td><p-tag [value]="e.status" [severity]="e.status==='Active'?'success':'danger'"></p-tag></td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </ng-container>
+</div>

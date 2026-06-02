@@ -1,0 +1,41 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Payroll Management</h2>
+    <div class="header-controls">
+      <p-select [(ngModel)]="month" [options]="months" optionLabel="label" optionValue="value" (ngModelChange)="loadPayroll()"></p-select>
+      <p-select [(ngModel)]="year" [options]="years" (ngModelChange)="loadPayroll()" styleClass="ml-2"></p-select>
+      <p-button label="Generate Bulk Payroll" icon="pi pi-play" [loading]="generating" (onClick)="generateBulk()" styleClass="ml-2" severity="success"></p-button>
+    </div>
+  </div>
+
+  <div class="payroll-summary-bar" *ngIf="payroll.length > 0">
+    <span>Total Records: <strong>{{ payroll.length }}</strong></span>
+    <span class="ml-4">Total Net Payout: <strong>₹{{ totalNet | number:'1.0-0' }}</strong></span>
+  </div>
+
+  <p-table [value]="payroll" [loading]="loading" stripedRows>
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Employee</th><th>Dept</th><th>Basic</th><th>HRA</th><th>TA</th>
+        <th>Gross</th><th>PF</th><th>Tax</th><th>Net Salary</th><th>Status</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-p>
+      <tr>
+        <td><strong>{{ p.employeeCode }}</strong> {{ p.employeeName }}</td>
+        <td>{{ p.department }}</td>
+        <td>₹{{ p.baseSalary | number }}</td>
+        <td>₹{{ p.hra | number }}</td>
+        <td>₹{{ p.ta | number }}</td>
+        <td>₹{{ p.grossSalary | number }}</td>
+        <td class="text-danger">₹{{ p.pf | number }}</td>
+        <td class="text-danger">₹{{ p.tax | number }}</td>
+        <td><strong>₹{{ p.netSalary | number }}</strong></td>
+        <td><p-tag [value]="p.status" severity="success"></p-tag></td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr><td colspan="10" class="text-center">No payroll records. Click "Generate Bulk Payroll" to create.</td></tr>
+    </ng-template>
+  </p-table>
+</div>
