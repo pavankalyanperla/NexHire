@@ -1,0 +1,38 @@
+<div class="portal-layout">
+  <nav class="portal-navbar">
+    <div class="navbar-left">
+      <i class="pi pi-building app-logo-icon"></i>
+      <span class="app-logo-text">NexHire</span>
+    </div>
+    <div class="navbar-right">
+      <p-avatar
+        [label]="user?.fullName?.charAt(0) || 'E'"
+        styleClass="mr-2"
+        shape="circle"
+        [style]="{ 'background-color': '#3b82f6', 'color': '#fff' }"
+      ></p-avatar>
+      <span class="user-name">{{ user?.fullName }}</span>
+      <span class="role-badge employee-badge">Employee</span>
+      <p-button icon="pi pi-sign-out" label="Logout" severity="secondary" [text]="true" (onClick)="logout()" styleClass="ml-2"></p-button>
+    </div>
+  </nav>
+  <div class="portal-body">
+    <aside class="portal-sidebar">
+      <ul class="sidebar-menu">
+        <li *ngFor="let item of menuItems" class="sidebar-item">
+          <a [routerLink]="item.routerLink" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.routerLink === '/employee' }">
+            <i [class]="item.icon"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+    <main class="portal-main">
+      <div class="welcome-card">
+        <h2>Welcome back, {{ user?.fullName }}!</h2>
+        <p>You're logged in as <strong>Employee</strong> — {{ user?.department }}</p>
+      </div>
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,77 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <!-- Header -->
+    <div class="login-header">
+      <div class="logo-icon">
+        <i class="pi pi-building" style="font-size: 2.5rem; color: #6366f1;"></i>
+      </div>
+      <h1 class="app-title">NexHire</h1>
+      <p class="app-tagline">AI-Powered Next Generation HRMS</p>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Error Message -->
+    <p-message *ngIf="errorMessage" severity="error" [text]="errorMessage" styleClass="w-full mb-3"></p-message>
+
+    <!-- Login Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="field">
+        <label for="email">Email Address</label>
+        <input
+          id="email"
+          type="email"
+          pInputText
+          formControlName="email"
+          placeholder="you@nexhire.com"
+          class="w-full"
+          [class.ng-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+        />
+        <small class="p-error" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+          Valid email required.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <p-password
+          inputId="password"
+          formControlName="password"
+          placeholder="Enter password"
+          [feedback]="false"
+          [toggleMask]="true"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+        ></p-password>
+        <small class="p-error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          Password required.
+        </small>
+      </div>
+
+      <p-button
+        type="submit"
+        label="Sign In"
+        icon="pi pi-sign-in"
+        [loading]="loading"
+        styleClass="w-full mt-2"
+        severity="primary"
+      ></p-button>
+    </form>
+
+    <p-divider align="center"><span class="divider-text">Quick Demo Login</span></p-divider>
+
+    <!-- Quick Login Buttons -->
+    <div class="quick-login-grid">
+      <button
+        *ngFor="let q of quickLogins"
+        type="button"
+        class="quick-login-btn"
+        (click)="quickLogin(q)"
+        [disabled]="loading"
+      >
+        <i [class]="q.icon"></i>
+        <span>{{ q.label }}</span>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,23 +1,23 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/identity/{everything}",
+      "DownstreamPathTemplate": "/api/auth/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-identity", "Port": 5100 }],
-      "UpstreamPathTemplate": "/api/identity/{everything}",
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5100 }],
+      "UpstreamPathTemplate": "/api/auth/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/hrms/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-hrms", "Port": 5200 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
       "UpstreamPathTemplate": "/api/hrms/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/recruitment/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-recruitment", "Port": 5300 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5300 }],
       "UpstreamPathTemplate": "/api/recruitment/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     }
