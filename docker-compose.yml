@@ -1,0 +1,115 @@
+version: "3.9"
+
+services:
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "NexHire@SQL2026!"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+    networks:
+      - nexhire-net
+
+  nexhire-identity:
+    build:
+      context: ./backend/IdentityService
+      dockerfile: Dockerfile
+    ports:
+      - "5100:5100"
+    environment:
+      - ASPNETCORE_URLS=http://+:5100
+      - ConnectionStrings__IdentityDb=Server=sql-server;Database=NexHire_IdentityDB;User Id=sa;Password=NexHire@SQL2026!;TrustServerCertificate=True;
+      - JwtSettings__Secret=${JWT_SECRET}
+    depends_on:
+      - sql-server
+    networks:
+      - nexhire-net
+
+  nexhire-hrms:
+    build:
+      context: ./backend/HRMSService
+      dockerfile: Dockerfile
+    ports:
+      - "5200:5200"
+    environment:
+      - ASPNETCORE_URLS=http://+:5200
+      - ConnectionStrings__HrmsDb=Server=sql-server;Database=NexHire_HRMSDB;User Id=sa;Password=NexHire@SQL2026!;TrustServerCertificate=True;
+      - JwtSettings__Secret=${JWT_SECRET}
+    depends_on:
+      - sql-server
+    networks:
+      - nexhire-net
+
+  nexhire-recruitment:
+    build:
+      context: ./backend/RecruitmentService
+      dockerfile: Dockerfile
+    ports:
+      - "5300:5300"
+    environment:
+      - ASPNETCORE_URLS=http://+:5300
+      - ConnectionStrings__RecruitmentDb=Server=sql-server;Database=NexHire_RecruitmentDB;User Id=sa;Password=NexHire@SQL2026!;TrustServerCertificate=True;
+      - JwtSettings__Secret=${JWT_SECRET}
+    depends_on:
+      - sql-server
+    networks:
+      - nexhire-net
+
+  nexhire-gateway:
+    build:
+      context: ./gateway/OcelotGateway
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+    depends_on:
+      - nexhire-identity
+      - nexhire-hrms
+      - nexhire-recruitment
+    networks:
+      - nexhire-net
+
+  nexhire-resume-ai:
+    build:
+      context: ./ai-services/ResumeAI
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+    networks:
+      - nexhire-net
+
+  nexhire-interview-ai:
+    build:
+      context: ./ai-services/InterviewAI
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+    networks:
+      - nexhire-net
+
+  nexhire-angular:
+    build:
+      context: ./frontend/nexhire-angular
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      - nexhire-gateway
+    networks:
+      - nexhire-net
+
+volumes:
+  sqldata:
+
+networks:
+  nexhire-net:
+    driver: bridge

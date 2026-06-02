@@ -1,0 +1,23 @@
+# .NET
+**/bin/
+**/obj/
+**/*.user
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+ai-services/ResumeAI/models/
+ai-services/InterviewAI/models/
+
+# Angular
+**/node_modules/
+**/.angular/
+
+# Environment
+.env
+*.env
+
+# SQL
+*.mdf
+*.ldf
