@@ -1,8 +1,9 @@
-version: "3.9"
+version: '3.8'
 
 services:
   sql-server:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: nexhire-sqlserver
     environment:
       SA_PASSWORD: "NexHire@SQL2026!"
       ACCEPT_EULA: "Y"
@@ -10,22 +11,33 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - sqldata:/var/opt/mssql
+      - sqlserver_data:/var/opt/mssql
     networks:
       - nexhire-net
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'NexHire@SQL2026!' -Q 'SELECT 1' -No 2>/dev/null || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
 
   nexhire-identity:
     build:
       context: ./backend/IdentityService
       dockerfile: Dockerfile
+    container_name: nexhire-identity
     ports:
       - "5100:5100"
     environment:
       - ASPNETCORE_URLS=http://+:5100
-      - ConnectionStrings__IdentityDb=Server=sql-server;Database=NexHire_IdentityDB;User Id=sa;Password=NexHire@SQL2026!;TrustServerCertificate=True;
-      - JwtSettings__Secret=${JWT_SECRET}
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sql-server;Database=NexHire_IdentityDB;User Id=sa;Password=NexHire@SQL2026!;TrustServerCertificate=True;
+      - JwtSettings__Secret=NexHire@SuperSecretKey#2026!FWC$XyZ987
+      - JwtSettings__Issuer=NexHire
+      - JwtSettings__Audience=NexHireUsers
     depends_on:
-      - sql-server
+      sql-server:
+        condition: service_healthy
     networks:
       - nexhire-net
 
@@ -33,44 +45,19 @@ services:
     build:
       context: ./backend/HRMSService
       dockerfile: Dockerfile
+    container_name: nexhire-hrms
     ports:
       - "5200:5200"
     environment:
       - ASPNETCORE_URLS=http://+:5200
-      - ConnectionStrings__HrmsDb=Server=sql-server;Database=NexHire_HRMSDB;User Id=sa;Password=NexHire@SQL2026!;TrustServerCertificate=True;
-      - JwtSettings__Secret=${JWT_SECRET}
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sql-server;Database=NexHire_HRMSDB;User Id=sa;Password=NexHire@SQL2026!;TrustServerCertificate=True;
+      - JwtSettings__Secret=NexHire@SuperSecretKey#2026!FWC$XyZ987
+      - JwtSettings__Issuer=NexHire
+      - JwtSettings__Audience=NexHireUsers
     depends_on:
-      - sql-server
-    networks:
-      - nexhire-net
-
-  nexhire-recruitment:
-    build:
-      context: ./backend/RecruitmentService
-      dockerfile: Dockerfile
-    ports:
-      - "5300:5300"
-    environment:
-      - ASPNETCORE_URLS=http://+:5300
-      - ConnectionStrings__RecruitmentDb=Server=sql-server;Database=NexHire_RecruitmentDB;User Id=sa;Password=NexHire@SQL2026!;TrustServerCertificate=True;
-      - JwtSettings__Secret=${JWT_SECRET}
-    depends_on:
-      - sql-server
-    networks:
-      - nexhire-net
-
-  nexhire-gateway:
-    build:
-      context: ./gateway/OcelotGateway
-      dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
-    environment:
-      - ASPNETCORE_URLS=http://+:5000
-    depends_on:
-      - nexhire-identity
-      - nexhire-hrms
-      - nexhire-recruitment
+      sql-server:
+        condition: service_healthy
     networks:
       - nexhire-net
 
@@ -78,10 +65,11 @@ services:
     build:
       context: ./ai-services/ResumeAI
       dockerfile: Dockerfile
+    container_name: nexhire-resume-ai
     ports:
       - "8001:8001"
     environment:
-      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     networks:
       - nexhire-net
 
@@ -89,10 +77,54 @@ services:
     build:
       context: ./ai-services/InterviewAI
       dockerfile: Dockerfile
+    container_name: nexhire-interview-ai
     ports:
       - "8002:8002"
     environment:
-      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    networks:
+      - nexhire-net
+
+  nexhire-recruitment:
+    build:
+      context: ./backend/RecruitmentService
+      dockerfile: Dockerfile
+    container_name: nexhire-recruitment
+    ports:
+      - "5300:5300"
+    environment:
+      - ASPNETCORE_URLS=http://+:5300
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sql-server;Database=NexHire_RecruitmentDB;User Id=sa;Password=NexHire@SQL2026!;TrustServerCertificate=True;
+      - JwtSettings__Secret=NexHire@SuperSecretKey#2026!FWC$XyZ987
+      - JwtSettings__Issuer=NexHire
+      - JwtSettings__Audience=NexHireUsers
+      - AIServices__ResumeAIUrl=http://nexhire-resume-ai:8001
+      - AIServices__InterviewAIUrl=http://nexhire-interview-ai:8002
+    depends_on:
+      sql-server:
+        condition: service_healthy
+      nexhire-resume-ai:
+        condition: service_started
+      nexhire-interview-ai:
+        condition: service_started
+    networks:
+      - nexhire-net
+
+  nexhire-gateway:
+    build:
+      context: ./gateway/OcelotGateway
+      dockerfile: Dockerfile
+    container_name: nexhire-gateway
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ASPNETCORE_ENVIRONMENT=Production
+    depends_on:
+      - nexhire-identity
+      - nexhire-hrms
+      - nexhire-recruitment
     networks:
       - nexhire-net
 
@@ -100,6 +132,7 @@ services:
     build:
       context: ./frontend/nexhire-angular
       dockerfile: Dockerfile
+    container_name: nexhire-angular
     ports:
       - "4200:80"
     depends_on:
@@ -108,7 +141,7 @@ services:
       - nexhire-net
 
 volumes:
-  sqldata:
+  sqlserver_data:
 
 networks:
   nexhire-net:

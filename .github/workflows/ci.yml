@@ -1,0 +1,72 @@
+name: NexHire CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-dotnet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build IdentityService
+        run: dotnet build backend/IdentityService/IdentityService.API/IdentityService.API.csproj -c Release
+
+      - name: Build HRMSService
+        run: dotnet build backend/HRMSService/HRMSService.API/HRMSService.API.csproj -c Release
+
+      - name: Build RecruitmentService
+        run: dotnet build backend/RecruitmentService/RecruitmentService.API/RecruitmentService.API.csproj -c Release
+
+      - name: Build OcelotGateway
+        run: dotnet build gateway/OcelotGateway/OcelotGateway.csproj -c Release
+
+  build-angular:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/nexhire-angular/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend/nexhire-angular
+
+      - name: Build Angular
+        run: npm run build
+        working-directory: frontend/nexhire-angular
+
+  build-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install ResumeAI dependencies
+        run: pip install -r ai-services/ResumeAI/requirements.txt
+
+      - name: Install InterviewAI dependencies
+        run: pip install -r ai-services/InterviewAI/requirements.txt
+
+      - name: Validate ResumeAI syntax
+        run: python -m py_compile ai-services/ResumeAI/main.py
+
+      - name: Validate InterviewAI syntax
+        run: python -m py_compile ai-services/InterviewAI/main.py

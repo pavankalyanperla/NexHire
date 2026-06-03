@@ -3,117 +3,117 @@
     {
       "DownstreamPathTemplate": "/api/auth/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-identity", "Port": 5100 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5100 }],
       "UpstreamPathTemplate": "/api/auth/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/employees/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-hrms", "Port": 5200 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
       "UpstreamPathTemplate": "/api/employees/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/employees",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-hrms", "Port": 5200 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
       "UpstreamPathTemplate": "/api/employees",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/attendance/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-hrms", "Port": 5200 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
       "UpstreamPathTemplate": "/api/attendance/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/leaves/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-hrms", "Port": 5200 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
       "UpstreamPathTemplate": "/api/leaves/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/leaves",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-hrms", "Port": 5200 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
       "UpstreamPathTemplate": "/api/leaves",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/payroll/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-hrms", "Port": 5200 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
       "UpstreamPathTemplate": "/api/payroll/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/performance/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-hrms", "Port": 5200 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
       "UpstreamPathTemplate": "/api/performance/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/performance",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-hrms", "Port": 5200 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
       "UpstreamPathTemplate": "/api/performance",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/analytics/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-hrms", "Port": 5200 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
       "UpstreamPathTemplate": "/api/analytics/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/onboarding/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-hrms", "Port": 5200 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
       "UpstreamPathTemplate": "/api/onboarding/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/onboarding",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-hrms", "Port": 5200 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
       "UpstreamPathTemplate": "/api/onboarding",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/jobpostings/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-recruitment", "Port": 5300 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5300 }],
       "UpstreamPathTemplate": "/api/jobpostings/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/jobpostings",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-recruitment", "Port": 5300 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5300 }],
       "UpstreamPathTemplate": "/api/jobpostings",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/candidates/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-recruitment", "Port": 5300 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5300 }],
       "UpstreamPathTemplate": "/api/candidates/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/ai/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "nexhire-recruitment", "Port": 5300 }],
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5300 }],
       "UpstreamPathTemplate": "/api/ai/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://nexhire-gateway:5000"
+    "BaseUrl": "http://localhost:5000"
   }
 }
