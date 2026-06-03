@@ -1,25 +1,45 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { HrmsService } from '../../core/services/hrms.service';
 import { AuthService } from '../../core/services/auth.service';
 import { OnboardingRecordDto } from '../../core/models/hrms.model';
 
 @Component({ selector: 'app-my-onboarding', templateUrl: './my-onboarding.component.html', standalone: false })
-export class MyOnboardingComponent implements OnInit {
+export class MyOnboardingComponent implements OnInit, AfterViewInit {
   record: OnboardingRecordDto | null = null;
   loading = true;
   notFound = false;
+  dataLoaded = false;
 
-  constructor(private hrms: HrmsService, private auth: AuthService) {}
+  constructor(private hrms: HrmsService, private auth: AuthService, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit() {
+  ngOnInit() { this.load(); }
+
+  ngAfterViewInit() {
+    setTimeout(() => { if (!this.dataLoaded) this.load(); }, 100);
+  }
+
+  load() {
     const userId = this.auth.getCurrentUser()?.userId;
     if (!userId) { this.loading = false; return; }
-    this.hrms.getEmployeeByUserId(userId).subscribe(emp => {
-      this.hrms.getOnboardingByEmployee(emp.id).subscribe({
-        next: r => { this.record = r; this.loading = false; },
-        error: (e) => { this.notFound = e.status === 404; this.loading = false; }
-      });
-    }, () => this.loading = false);
+    this.loading = true;
+    this.hrms.getEmployeeByUserId(userId).subscribe({
+      next: emp => {
+        this.hrms.getOnboardingByEmployee(emp.id).subscribe({
+          next: r => {
+            this.record = r;
+            this.loading = false;
+            this.dataLoaded = true;
+            this.cdr.detectChanges();
+          },
+          error: (e) => {
+            this.notFound = e.status === 404;
+            this.loading = false;
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
+    });
   }
 
   totalItems = 8;

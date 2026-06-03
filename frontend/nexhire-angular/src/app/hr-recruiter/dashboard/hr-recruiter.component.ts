@@ -12,7 +12,7 @@ export class HRRecruiterComponent implements OnInit {
   user: AuthResponse | null = null;
 
   menuItems = [
-    { label: 'Dashboard',   icon: 'pi pi-home',       link: '/hr' },
+    { label: 'Dashboard',   icon: 'pi pi-home',       link: '/hr/dashboard' },
     { label: 'Employees',   icon: 'pi pi-users',      link: '/hr/employees' },
     { label: 'Attendance',  icon: 'pi pi-calendar',   link: '/hr/attendance' },
     { label: 'Job Postings',icon: 'pi pi-briefcase',  link: '/hr/jobs' },

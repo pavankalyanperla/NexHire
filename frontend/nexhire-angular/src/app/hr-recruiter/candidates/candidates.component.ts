@@ -1,15 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { RecruitmentService } from '../../core/services/recruitment.service';
 import { CandidateApplicationDto, JobPostingDto, AIScreeningResultDto } from '../../core/models/recruitment.model';
 
 @Component({ selector: 'app-candidates', templateUrl: './candidates.component.html', standalone: false })
-export class CandidatesComponent implements OnInit {
+export class CandidatesComponent implements OnInit, AfterViewInit {
   jobId = 0;
   job: JobPostingDto | null = null;
   candidates: CandidateApplicationDto[] = [];
   loading = false;
   rankLoading = false;
+  dataLoaded = false;
 
   // AI Screening dialog
   showScreenDialog = false;
@@ -24,24 +25,36 @@ export class CandidatesComponent implements OnInit {
 
   statuses = ['Applied', 'Screening', 'Shortlisted', 'Rejected', 'Hired'];
 
-  constructor(private route: ActivatedRoute, private recruitment: RecruitmentService) {}
+  constructor(private route: ActivatedRoute, private recruitment: RecruitmentService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.jobId = Number(this.route.snapshot.paramMap.get('jobId'));
-    this.recruitment.getJobPostingById(this.jobId).subscribe(j => this.job = j);
+    this.recruitment.getJobPostingById(this.jobId).subscribe(j => { this.job = j; this.cdr.detectChanges(); });
     this.loadCandidates();
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => { if (!this.dataLoaded) this.loadCandidates(); }, 100);
   }
 
   loadCandidates() {
     this.loading = true;
-    this.recruitment.getApplicationsByJob(this.jobId).subscribe({ next: c => { this.candidates = c; this.loading = false; }, error: () => this.loading = false });
+    this.recruitment.getApplicationsByJob(this.jobId).subscribe({
+      next: c => {
+        this.candidates = c;
+        this.loading = false;
+        this.dataLoaded = true;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
+    });
   }
 
   rankAll() {
     this.rankLoading = true;
     this.recruitment.rankAllCandidates(this.jobId).subscribe({
-      next: c => { this.candidates = c; this.rankLoading = false; },
-      error: () => this.rankLoading = false
+      next: c => { this.candidates = c; this.rankLoading = false; this.cdr.detectChanges(); },
+      error: () => { this.rankLoading = false; this.cdr.detectChanges(); }
     });
   }
 
@@ -51,8 +64,8 @@ export class CandidatesComponent implements OnInit {
     this.showScreenDialog = true;
     this.screenResult = null;
     this.recruitment.screenResume(id).subscribe({
-      next: r => { this.screenResult = r; this.screenLoading = false; },
-      error: () => { this.screenLoading = false; }
+      next: r => { this.screenResult = r; this.screenLoading = false; this.cdr.detectChanges(); },
+      error: () => { this.screenLoading = false; this.cdr.detectChanges(); }
     });
   }
 
@@ -61,13 +74,13 @@ export class CandidatesComponent implements OnInit {
     this.showQDialog = true;
     this.questions = null;
     this.recruitment.generateInterviewQuestions(id).subscribe({
-      next: q => { this.questions = q; this.qLoading = false; },
-      error: () => this.qLoading = false
+      next: q => { this.questions = q; this.qLoading = false; this.cdr.detectChanges(); },
+      error: () => { this.qLoading = false; this.cdr.detectChanges(); }
     });
   }
 
   updateStatus(id: number, status: string) {
-    this.recruitment.updateApplicationStatus(id, status).subscribe(() => this.loadCandidates());
+    this.recruitment.updateApplicationStatus(id, status).subscribe(() => { this.dataLoaded = false; this.loadCandidates(); });
   }
 
   scoreSeverity(score: number | null): 'success' | 'warn' | 'danger' | 'secondary' {
@@ -77,7 +90,5 @@ export class CandidatesComponent implements OnInit {
     return 'danger';
   }
 
-  getQList(obj: any, key: string): any[] {
-    return obj?.[key] || [];
-  }
+  getQList(obj: any, key: string): any[] { return obj?.[key] || []; }
 }

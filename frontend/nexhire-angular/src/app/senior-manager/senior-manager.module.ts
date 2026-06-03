@@ -11,7 +11,8 @@ const routes: Routes = [{
   path: '',
   component: SeniorManagerComponent,
   children: [
-    { path: '', component: ManagerDashboardComponent },
+    { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    { path: 'dashboard', component: ManagerDashboardComponent },
     { path: 'leaves', component: LeaveApprovalsComponent },
     { path: 'performance', component: PerformanceReviewsComponent }
   ]

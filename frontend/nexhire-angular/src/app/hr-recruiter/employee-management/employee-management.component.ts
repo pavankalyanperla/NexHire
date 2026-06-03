@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { HrmsService } from '../../core/services/hrms.service';
 import { EmployeeDto, CreateEmployeeDto, UpdateEmployeeDto } from '../../core/models/hrms.model';
 
 @Component({ selector: 'app-employee-management', templateUrl: './employee-management.component.html', standalone: false })
-export class EmployeeManagementComponent implements OnInit {
+export class EmployeeManagementComponent implements OnInit, AfterViewInit {
   employees: EmployeeDto[] = [];
   filtered: EmployeeDto[] = [];
   search = '';
@@ -11,23 +11,62 @@ export class EmployeeManagementComponent implements OnInit {
   editMode = false;
   selectedId = 0;
   loading = true;
+  dataLoaded = false;
   form: CreateEmployeeDto = this.emptyForm();
 
-  constructor(private hrms: HrmsService) {}
+  constructor(private hrms: HrmsService, private cdr: ChangeDetectorRef) {}
+
   ngOnInit() { this.load(); }
-  load() { this.hrms.getEmployees().subscribe({ next: e => { this.employees = e; this.applyFilter(); this.loading = false; }, error: () => this.loading = false }); }
-  applyFilter() { const q = this.search.toLowerCase(); this.filtered = this.employees.filter(e => e.fullName.toLowerCase().includes(q) || e.department.toLowerCase().includes(q)); }
+
+  ngAfterViewInit() {
+    setTimeout(() => { if (!this.dataLoaded) this.load(); }, 100);
+  }
+
+  load() {
+    this.loading = true;
+    this.hrms.getEmployees().subscribe({
+      next: e => {
+        this.employees = e;
+        this.applyFilter();
+        this.loading = false;
+        this.dataLoaded = true;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
+    });
+  }
+
+  applyFilter() {
+    const q = this.search.toLowerCase();
+    this.filtered = this.employees.filter(e => e.fullName.toLowerCase().includes(q) || e.department.toLowerCase().includes(q));
+  }
 
   openCreate() { this.form = this.emptyForm(); this.editMode = false; this.showDialog = true; }
-  openEdit(e: EmployeeDto) { this.selectedId = e.id; this.form = { ...e, joiningDate: e.joiningDate }; this.editMode = true; this.showDialog = true; }
+
+  openEdit(e: EmployeeDto) {
+    this.selectedId = e.id;
+    this.form = { ...e, joiningDate: e.joiningDate };
+    this.editMode = true;
+    this.showDialog = true;
+  }
 
   save() {
     if (this.editMode) {
-      this.hrms.updateEmployee(this.selectedId, { phone: this.form.phone, department: this.form.department, designation: this.form.designation, status: 'Active', baseSalary: this.form.baseSalary }).subscribe(() => { this.showDialog = false; this.load(); });
+      this.hrms.updateEmployee(this.selectedId, { phone: this.form.phone, department: this.form.department, designation: this.form.designation, status: 'Active', baseSalary: this.form.baseSalary }).subscribe(() => {
+        this.showDialog = false;
+        this.dataLoaded = false;
+        this.load();
+      });
     } else {
-      this.hrms.createEmployee(this.form).subscribe(() => { this.showDialog = false; this.load(); });
+      this.hrms.createEmployee(this.form).subscribe(() => {
+        this.showDialog = false;
+        this.dataLoaded = false;
+        this.load();
+      });
     }
   }
 
-  private emptyForm(): CreateEmployeeDto { return { userId: 0, fullName: '', email: '', phone: '', department: '', designation: '', role: 'Employee', joiningDate: new Date().toISOString(), baseSalary: 0 }; }
+  private emptyForm(): CreateEmployeeDto {
+    return { userId: 0, fullName: '', email: '', phone: '', department: '', designation: '', role: 'Employee', joiningDate: new Date().toISOString(), baseSalary: 0 };
+  }
 }

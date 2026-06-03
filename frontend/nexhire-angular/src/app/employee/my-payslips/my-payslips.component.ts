@@ -1,32 +1,55 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { HrmsService } from '../../core/services/hrms.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PayrollRecordDto } from '../../core/models/hrms.model';
 
 @Component({ selector: 'app-my-payslips', templateUrl: './my-payslips.component.html', standalone: false })
-export class MyPayslipsComponent implements OnInit {
+export class MyPayslipsComponent implements OnInit, AfterViewInit {
   payslip: PayrollRecordDto | null = null;
   employeeId = 0;
   month = new Date().getMonth() + 1;
   year = new Date().getFullYear();
   loading = true;
   notFound = false;
+  dataLoaded = false;
   months = [1,2,3,4,5,6,7,8,9,10,11,12].map(m => ({ label: new Date(2000, m-1).toLocaleString('default',{month:'long'}), value: m }));
   years = [2025, 2026];
 
-  constructor(private hrms: HrmsService, private auth: AuthService) {}
-  ngOnInit() {
+  constructor(private hrms: HrmsService, private auth: AuthService, private cdr: ChangeDetectorRef) {}
+
+  ngOnInit() { this.initLoad(); }
+
+  ngAfterViewInit() {
+    setTimeout(() => { if (!this.dataLoaded) this.initLoad(); }, 100);
+  }
+
+  initLoad() {
     const userId = this.auth.getCurrentUser()?.userId;
     if (!userId) { this.loading = false; return; }
-    this.hrms.getEmployeeByUserId(userId).subscribe(emp => { this.employeeId = emp.id; this.load(); });
+    this.hrms.getEmployeeByUserId(userId).subscribe({
+      next: emp => { this.employeeId = emp.id; this.load(); },
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
+    });
   }
+
   load() {
     this.loading = true;
     this.notFound = false;
     this.hrms.getPayslip(this.employeeId, this.month, this.year).subscribe({
-      next: p => { this.payslip = p; this.loading = false; },
-      error: () => { this.payslip = null; this.notFound = true; this.loading = false; }
+      next: p => {
+        this.payslip = p;
+        this.loading = false;
+        this.dataLoaded = true;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.payslip = null;
+        this.notFound = true;
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
+
   monthName(m: number) { return new Date(2000, m-1).toLocaleString('default', { month: 'long' }); }
 }

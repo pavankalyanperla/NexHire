@@ -15,7 +15,8 @@ const routes: Routes = [{
   path: '',
   component: EmployeeComponent,
   children: [
-    { path: '', component: EmployeeDashboardComponent },
+    { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    { path: 'dashboard', component: EmployeeDashboardComponent },
     { path: 'attendance', component: MyAttendanceComponent },
     { path: 'payslips', component: MyPayslipsComponent },
     { path: 'leaves', component: MyLeavesComponent },

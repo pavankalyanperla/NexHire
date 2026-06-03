@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { HrmsService } from '../../core/services/hrms.service';
 import { OnboardingRecordDto, EmployeeDto } from '../../core/models/hrms.model';
 
 @Component({ selector: 'app-onboarding', templateUrl: './onboarding.component.html', standalone: false })
-export class OnboardingComponent implements OnInit {
+export class OnboardingComponent implements OnInit, AfterViewInit {
   records: OnboardingRecordDto[] = [];
   employees: EmployeeDto[] = [];
   loading = true;
+  dataLoaded = false;
 
   showCreateDialog = false;
   createForm = { employeeId: 0, joiningDate: '', notes: '' };
@@ -20,18 +21,27 @@ export class OnboardingComponent implements OnInit {
   offerStatuses = ['Pending', 'Sent', 'Accepted', 'Rejected'];
   overallStatuses = ['InProgress', 'Completed'];
 
-  constructor(private hrms: HrmsService) {}
+  constructor(private hrms: HrmsService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.load();
-    this.hrms.getEmployees().subscribe(e => this.employees = e);
+    this.hrms.getEmployees().subscribe(e => { this.employees = e; this.cdr.detectChanges(); });
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => { if (!this.dataLoaded) this.load(); }, 100);
   }
 
   load() {
     this.loading = true;
     this.hrms.getAllOnboarding().subscribe({
-      next: r => { this.records = r; this.loading = false; },
-      error: () => this.loading = false
+      next: r => {
+        this.records = r;
+        this.loading = false;
+        this.dataLoaded = true;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
@@ -48,7 +58,12 @@ export class OnboardingComponent implements OnInit {
       joiningDate: this.createForm.joiningDate || null,
       notes: this.createForm.notes
     }).subscribe({
-      next: () => { this.showCreateDialog = false; this.createLoading = false; this.load(); },
+      next: () => {
+        this.showCreateDialog = false;
+        this.createLoading = false;
+        this.dataLoaded = false;
+        this.load();
+      },
       error: (e) => { alert(e.error?.message || 'Error creating onboarding record'); this.createLoading = false; }
     });
   }
@@ -82,8 +97,9 @@ export class OnboardingComponent implements OnInit {
         if (idx >= 0) this.records[idx] = updated;
         this.showEditDialog = false;
         this.editLoading = false;
+        this.cdr.detectChanges();
       },
-      error: () => this.editLoading = false
+      error: () => { this.editLoading = false; this.cdr.detectChanges(); }
     });
   }
 

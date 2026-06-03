@@ -12,7 +12,7 @@ export class SeniorManagerComponent implements OnInit {
   user: AuthResponse | null = null;
 
   menuItems = [
-    { label: 'Dashboard',   icon: 'pi pi-home',        link: '/manager' },
+    { label: 'Dashboard',   icon: 'pi pi-home',        link: '/manager/dashboard' },
     { label: 'My Team',     icon: 'pi pi-users',       link: '/manager/team' },
     { label: 'Leave Approvals', icon: 'pi pi-check-circle', link: '/manager/leaves' },
     { label: 'Performance', icon: 'pi pi-star',        link: '/manager/performance' }

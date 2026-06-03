@@ -12,7 +12,7 @@ export class EmployeeComponent implements OnInit {
   user: AuthResponse | null = null;
 
   menuItems = [
-    { label: 'Dashboard',   icon: 'pi pi-home',       link: '/employee' },
+    { label: 'Dashboard',   icon: 'pi pi-home',       link: '/employee/dashboard' },
     { label: 'Attendance',  icon: 'pi pi-calendar',   link: '/employee/attendance' },
     { label: 'Payslips',    icon: 'pi pi-wallet',     link: '/employee/payslips' },
     { label: 'Leaves',      icon: 'pi pi-clock',      link: '/employee/leaves' },

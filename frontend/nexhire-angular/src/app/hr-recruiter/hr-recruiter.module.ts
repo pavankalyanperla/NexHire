@@ -16,7 +16,8 @@ const routes: Routes = [{
   path: '',
   component: HRRecruiterComponent,
   children: [
-    { path: '', component: HRDashboardComponent },
+    { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    { path: 'dashboard', component: HRDashboardComponent },
     { path: 'employees', component: EmployeeManagementComponent },
     { path: 'attendance', component: AttendanceOverviewComponent },
     { path: 'jobs', component: JobPostingsComponent },

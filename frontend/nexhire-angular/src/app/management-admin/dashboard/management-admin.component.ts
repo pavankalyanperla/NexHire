@@ -12,7 +12,7 @@ export class ManagementAdminComponent implements OnInit {
   user: AuthResponse | null = null;
 
   menuItems = [
-    { label: 'Dashboard',   icon: 'pi pi-home',       link: '/admin' },
+    { label: 'Dashboard',   icon: 'pi pi-home',       link: '/admin/dashboard' },
     { label: 'Employees',   icon: 'pi pi-users',      link: '/admin/employees' },
     { label: 'Payroll',     icon: 'pi pi-wallet',     link: '/admin/payroll' },
     { label: 'Recruitment', icon: 'pi pi-briefcase',  link: '/admin/recruitment' },
