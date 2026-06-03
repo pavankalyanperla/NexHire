@@ -1,99 +1,108 @@
-import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
-import { JobPostingDto } from '../core/models/recruitment.model';
 
 @Component({
   selector: 'app-careers',
+  standalone: false,
   templateUrl: './careers.component.html',
-  styleUrls: ['./careers.component.scss'],
-  standalone: false
+  styleUrls: ['./careers.component.scss']
 })
-export class CareersComponent implements OnInit, AfterViewInit {
-  jobs: JobPostingDto[] = [];
-  loading = true;
-  dataLoaded = false;
+export class CareersComponent implements OnInit {
+  jobs: any[] = [];
+  isLoading = false;
+  showApplyDialog = false;
+  selectedJob: any = null;
 
-  // Apply dialog
-  showApply = false;
-  selectedJob: JobPostingDto | null = null;
-  applying = false;
-  success = false;
-  errorMsg = '';
+  applicantName = '';
+  applicantEmail = '';
+  applicantPhone = '';
+  selectedFile: File | null = null;
+  submitting = false;
+  submitSuccess = false;
+  submitError = '';
 
-  form = { fullName: '', email: '', phone: '' };
-  resumeFile: File | null = null;
+  private directUrl  = 'http://localhost:5300/api';
+  private gatewayUrl = 'http://localhost:5000/api';
 
-  constructor(private http: HttpClient, private router: Router, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit() { this.load(); }
+  ngOnInit() { this.loadJobs(); }
 
-  ngAfterViewInit() {
-    setTimeout(() => { if (!this.dataLoaded) this.load(); }, 100);
-  }
-
-  load() {
-    this.loading = true;
-    this.http.get<JobPostingDto[]>(`${environment.apiUrl}/jobpostings`).subscribe({
-      next: jobs => {
-        this.jobs = jobs.filter(j => j.status === 'Open');
-        this.loading = false;
-        this.dataLoaded = true;
+  loadJobs() {
+    this.isLoading = true;
+    this.http.get<any[]>(`${this.directUrl}/jobpostings`).subscribe({
+      next: data => {
+        this.jobs = data.filter(j => j.status === 'Open');
+        this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: () => { this.loading = false; this.cdr.detectChanges(); }
-    });
-  }
-
-  openApply(job: JobPostingDto) {
-    this.selectedJob = job;
-    this.form = { fullName: '', email: '', phone: '' };
-    this.resumeFile = null;
-    this.success = false;
-    this.errorMsg = '';
-    this.showApply = true;
-  }
-
-  onFileChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files?.length) this.resumeFile = input.files[0];
-  }
-
-  submit() {
-    if (!this.selectedJob || !this.form.fullName || !this.form.email || !this.resumeFile) {
-      this.errorMsg = 'Please fill all fields and upload your resume (PDF).';
-      return;
-    }
-
-    this.applying = true;
-    this.errorMsg = '';
-
-    const fd = new FormData();
-    fd.append('jobPostingId', String(this.selectedJob.id));
-    fd.append('candidateName', this.form.fullName);
-    fd.append('candidateEmail', this.form.email);
-    fd.append('phone', this.form.phone);
-    fd.append('resume', this.resumeFile, this.resumeFile.name);
-
-    this.http.post(`${environment.apiUrl}/candidates/apply`, fd).subscribe({
-      next: () => {
-        this.success = true;
-        this.applying = false;
-        this.cdr.detectChanges();
-      },
-      error: (e) => {
-        this.errorMsg = e.error?.message || 'Submission failed. Please try again.';
-        this.applying = false;
-        this.cdr.detectChanges();
+      error: () => {
+        // Fallback to gateway
+        this.http.get<any[]>(`${this.gatewayUrl}/jobpostings`).subscribe({
+          next: data => {
+            this.jobs = data.filter(j => j.status === 'Open');
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          },
+          error: err => {
+            console.error('Failed to load jobs:', err);
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          }
+        });
       }
     });
   }
 
-  formatSalary(min: number, max: number): string {
-    const fmt = (n: number) => n >= 100000 ? '₹' + (n / 100000).toFixed(0) + 'L' : '₹' + (n / 1000).toFixed(0) + 'K';
-    return `${fmt(min)} – ${fmt(max)}`;
+  openApplyDialog(job: any) {
+    this.selectedJob = job;
+    this.showApplyDialog = true;
+    this.submitSuccess = false;
+    this.submitError = '';
+    this.applicantName = '';
+    this.applicantEmail = '';
+    this.applicantPhone = '';
+    this.selectedFile = null;
   }
 
-  goHome() { this.router.navigate(['/']); }
+  onFileSelect(event: any) {
+    const file = event.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      this.selectedFile = file;
+      this.submitError = '';
+    } else {
+      this.submitError = 'Please select a PDF file only.';
+    }
+  }
+
+  submitApplication() {
+    if (!this.applicantName || !this.applicantEmail || !this.applicantPhone || !this.selectedFile) {
+      this.submitError = 'Please fill all fields and upload your resume.';
+      return;
+    }
+
+    this.submitting = true;
+    this.submitError = '';
+
+    const fd = new FormData();
+    fd.append('JobPostingId', this.selectedJob.id.toString());
+    fd.append('CandidateName', this.applicantName);
+    fd.append('CandidateEmail', this.applicantEmail);
+    fd.append('Phone', this.applicantPhone);
+    fd.append('resume', this.selectedFile);
+
+    this.http.post(`${this.directUrl}/candidates/apply`, fd).subscribe({
+      next: () => {
+        this.submitSuccess = true;
+        this.submitting = false;
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        console.error('Apply error:', err);
+        this.submitError = err.error?.message || 'Failed to submit application. Please try again.';
+        this.submitting = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 }
