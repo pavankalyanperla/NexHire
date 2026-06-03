@@ -4,9 +4,20 @@ import os
 import io
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
-from typing import List
-import pdfplumber
-import google.generativeai as genai
+from typing import List, TYPE_CHECKING
+if TYPE_CHECKING:
+    # Allow type checkers/linters to resolve pdfplumber import without
+    # requiring it at runtime in environments where it's not installed.
+    import pdfplumber  # type: ignore
+
+try:
+    import pdfplumber  # type: ignore
+except ImportError:
+    pdfplumber = None
+try:
+    import google.generativeai as genai  # type: ignore
+except ImportError:
+    genai = None
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -42,6 +53,8 @@ def extract_json_from_text(text: str):
 @router.post("/extract-text")
 async def extract_text(file: UploadFile = File(...)):
     try:
+        if pdfplumber is None:
+            raise HTTPException(status_code=500, detail="pdfplumber is not installed")
         contents = await file.read()
         text_parts = []
         with pdfplumber.open(io.BytesIO(contents)) as pdf:
