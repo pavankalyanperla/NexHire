@@ -6,6 +6,7 @@ import { SeniorManagerComponent } from './dashboard/senior-manager.component';
 import { ManagerDashboardComponent } from './manager-dashboard/manager-dashboard.component';
 import { LeaveApprovalsComponent } from './leave-approvals/leave-approvals.component';
 import { PerformanceReviewsComponent } from './performance-reviews/performance-reviews.component';
+import { MyTeamComponent } from './my-team/my-team.component';
 
 const routes: Routes = [{
   path: '',
@@ -13,13 +14,15 @@ const routes: Routes = [{
   children: [
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     { path: 'dashboard', component: ManagerDashboardComponent },
+    { path: 'my-team', component: MyTeamComponent },
     { path: 'leaves', component: LeaveApprovalsComponent },
     { path: 'performance', component: PerformanceReviewsComponent }
   ]
 }];
 
 @NgModule({
-  declarations: [SeniorManagerComponent, ManagerDashboardComponent, LeaveApprovalsComponent, PerformanceReviewsComponent],
+  declarations: [SeniorManagerComponent, ManagerDashboardComponent, LeaveApprovalsComponent,
+    PerformanceReviewsComponent, MyTeamComponent],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })
 export class SeniorManagerModule {}

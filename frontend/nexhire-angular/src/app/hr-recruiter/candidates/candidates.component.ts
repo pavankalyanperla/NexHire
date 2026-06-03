@@ -12,13 +12,12 @@ export class CandidatesComponent implements OnInit, AfterViewInit {
   rankLoading = false;
   dataLoaded = false;
 
-  // AI Screening dialog
+  // AI Screening
   showScreenDialog = false;
   screenResult: AIScreeningResultDto | null = null;
   screenLoading = false;
-  screeningCandidateId = 0;
 
-  // Interview Questions dialog
+  // Interview Questions
   showQDialog = false;
   questions: any = null;
   qLoading = false;
@@ -53,34 +52,63 @@ export class CandidatesComponent implements OnInit, AfterViewInit {
   rankAll() {
     this.rankLoading = true;
     this.recruitment.rankAllCandidates(this.jobId).subscribe({
-      next: c => { this.candidates = c; this.rankLoading = false; this.cdr.detectChanges(); },
+      next: c => {
+        this.candidates = c;
+        this.rankLoading = false;
+        this.cdr.detectChanges();
+      },
       error: () => { this.rankLoading = false; this.cdr.detectChanges(); }
     });
   }
 
-  screen(id: number) {
-    this.screeningCandidateId = id;
+  screen(applicationId: number) {
     this.screenLoading = true;
     this.showScreenDialog = true;
     this.screenResult = null;
-    this.recruitment.screenResume(id).subscribe({
-      next: r => { this.screenResult = r; this.screenLoading = false; this.cdr.detectChanges(); },
-      error: () => { this.screenLoading = false; this.cdr.detectChanges(); }
+    this.cdr.detectChanges();
+
+    this.recruitment.screenResume(applicationId).subscribe({
+      next: result => {
+        this.screenResult = result;
+        this.screenLoading = false;
+        // Reload to show updated AI score in table
+        this.dataLoaded = false;
+        this.loadCandidates();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Screening error:', err);
+        this.screenLoading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
-  generateQuestions(id: number) {
+  generateQuestions(applicationId: number) {
     this.qLoading = true;
     this.showQDialog = true;
     this.questions = null;
-    this.recruitment.generateInterviewQuestions(id).subscribe({
-      next: q => { this.questions = q; this.qLoading = false; this.cdr.detectChanges(); },
-      error: () => { this.qLoading = false; this.cdr.detectChanges(); }
+    this.cdr.detectChanges();
+
+    this.recruitment.generateInterviewQuestions(applicationId).subscribe({
+      next: result => {
+        this.questions = result;
+        this.qLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Questions error:', err);
+        this.qLoading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
   updateStatus(id: number, status: string) {
-    this.recruitment.updateApplicationStatus(id, status).subscribe(() => { this.dataLoaded = false; this.loadCandidates(); });
+    this.recruitment.updateApplicationStatus(id, status).subscribe(() => {
+      this.dataLoaded = false;
+      this.loadCandidates();
+    });
   }
 
   scoreSeverity(score: number | null): 'success' | 'warn' | 'danger' | 'secondary' {

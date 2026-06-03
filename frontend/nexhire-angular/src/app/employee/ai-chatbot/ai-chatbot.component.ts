@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { RecruitmentService } from '../../core/services/recruitment.service';
+import { Component, ChangeDetectorRef } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
 
 interface ChatMessage { role: 'user' | 'ai'; text: string; category?: string; }
@@ -15,6 +15,8 @@ export class AIChatbotComponent {
   toastSev = '';
   showToastMsg = false;
 
+  private chatbotUrl = 'http://localhost:8002/api/interview/chatbot';
+
   suggestions = [
     'How many annual leaves do I get?',
     'What is the work from home policy?',
@@ -22,26 +24,35 @@ export class AIChatbotComponent {
     'How does salary disbursement work?'
   ];
 
-  constructor(private recruitment: RecruitmentService, private auth: AuthService) {}
+  constructor(private http: HttpClient, private auth: AuthService, private cdr: ChangeDetectorRef) {}
 
   toggle() { this.isOpen = !this.isOpen; }
 
   send(text?: string) {
-    const q = text || this.inputText.trim();
-    if (!q) return;
+    const q = (text || this.inputText).trim();
+    if (!q || this.loading) return;
 
     this.messages.push({ role: 'user', text: q });
     this.inputText = '';
     this.loading = true;
+    this.cdr.detectChanges();
 
     const user = this.auth.getCurrentUser();
-    this.recruitment.askChatbot({
+    this.http.post<{ answer: string; category: string }>(this.chatbotUrl, {
       question: q,
       employee_name: user?.fullName || 'Employee',
       department: user?.department || 'General'
     }).subscribe({
-      next: r => { this.messages.push({ role: 'ai', text: r.answer, category: r.category }); this.loading = false; },
-      error: () => { this.messages.push({ role: 'ai', text: 'Sorry, I could not process your question. Please try again.' }); this.loading = false; }
+      next: r => {
+        this.messages.push({ role: 'ai', text: r.answer, category: r.category });
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.messages.push({ role: 'ai', text: 'Sorry, the AI assistant is temporarily unavailable. Please try again.' });
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -60,12 +71,14 @@ export class AIChatbotComponent {
     recognition.interimResults = false;
 
     this.isListening = true;
+    this.cdr.detectChanges();
     recognition.start();
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       this.inputText = transcript;
       this.isListening = false;
+      this.cdr.detectChanges();
       this.send();
     };
 
@@ -74,13 +87,13 @@ export class AIChatbotComponent {
       this.showToast('Voice input error. Please try again.', 'error');
     };
 
-    recognition.onend = () => { this.isListening = false; };
+    recognition.onend = () => { this.isListening = false; this.cdr.detectChanges(); };
   }
 
   showToast(msg: string, sev: string) {
     this.toastMsg = msg;
     this.toastSev = sev;
     this.showToastMsg = true;
-    setTimeout(() => this.showToastMsg = false, 3000);
+    setTimeout(() => { this.showToastMsg = false; this.cdr.detectChanges(); }, 3000);
   }
 }

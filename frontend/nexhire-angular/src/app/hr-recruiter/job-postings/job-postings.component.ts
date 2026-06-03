@@ -10,6 +10,7 @@ export class JobPostingsComponent implements OnInit, AfterViewInit {
   loading = true;
   showDialog = false;
   dataLoaded = false;
+  linkCopied = false;
   form: CreateJobPostingDto = this.emptyForm();
   expLevels = ['Junior', 'Mid', 'Senior'];
   jobTypes = ['Full-time', 'Part-time', 'Contract'];
@@ -45,6 +46,14 @@ export class JobPostingsComponent implements OnInit, AfterViewInit {
   }
 
   viewCandidates(jobId: number) { this.router.navigate(['/hr/jobs', jobId, 'candidates']); }
+
+  copyApplyLink() {
+    navigator.clipboard.writeText('http://localhost:4200/careers').then(() => {
+      this.linkCopied = true;
+      this.cdr.detectChanges();
+      setTimeout(() => { this.linkCopied = false; this.cdr.detectChanges(); }, 4000);
+    });
+  }
   getSeverity(s: string) { return s === 'Open' ? 'success' : s === 'Closed' ? 'danger' : 'warn'; }
 
   emptyForm(): CreateJobPostingDto {

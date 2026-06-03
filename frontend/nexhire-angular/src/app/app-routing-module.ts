@@ -3,7 +3,14 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  {
+    path: '',
+    loadChildren: () => import('./home/home.module').then(m => m.HomeModule)
+  },
+  {
+    path: 'careers',
+    loadChildren: () => import('./careers/careers.module').then(m => m.CareersModule)
+  },
   {
     path: 'login',
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
@@ -32,7 +39,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     data: { role: 'Employee' }
   },
-  { path: '**', redirectTo: '/login' }
+  { path: '**', redirectTo: '/' }
 ];
 
 @NgModule({

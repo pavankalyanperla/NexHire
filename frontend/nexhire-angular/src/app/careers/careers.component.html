@@ -1,0 +1,106 @@
+<div class="careers-page">
+
+  <!-- Header -->
+  <div class="careers-header">
+    <button class="back-btn" (click)="goHome()">
+      <i class="pi pi-arrow-left"></i> Back to Home
+    </button>
+    <div class="careers-title">
+      <h1><i class="pi pi-briefcase"></i> Open Positions</h1>
+      <p>Join the NexHire team and help build the future of HR technology.</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="careers-loading">
+    <p-progressSpinner></p-progressSpinner>
+    <p>Loading open positions…</p>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && jobs.length === 0" class="careers-empty">
+    <i class="pi pi-inbox" style="font-size:3rem;color:#9ca3af"></i>
+    <p>No open positions at the moment. Check back soon!</p>
+  </div>
+
+  <!-- Job Cards -->
+  <div *ngIf="!loading && jobs.length > 0" class="jobs-grid">
+    <div class="job-card" *ngFor="let job of jobs">
+      <div class="job-header">
+        <div>
+          <h3 class="job-title">{{ job.title }}</h3>
+          <p class="job-dept">{{ job.department }}</p>
+        </div>
+        <span class="job-type-badge">{{ job.jobType }}</span>
+      </div>
+      <div class="job-meta">
+        <span class="meta-item"><i class="pi pi-map-marker"></i> {{ job.location }}</span>
+        <span class="meta-item"><i class="pi pi-chart-line"></i> {{ job.experienceLevel }}</span>
+        <span class="meta-item"><i class="pi pi-wallet"></i> {{ formatSalary(job.salaryMin, job.salaryMax) }}</span>
+      </div>
+      <p class="job-desc">{{ job.description | slice:0:120 }}{{ job.description.length > 120 ? '…' : '' }}</p>
+      <div class="job-skills" *ngIf="job.requiredSkills">
+        <span class="skill-tag" *ngFor="let s of job.requiredSkills.split(',').slice(0,4)">{{ s.trim() }}</span>
+      </div>
+      <div class="job-footer">
+        <span class="deadline"><i class="pi pi-calendar"></i> Apply by {{ job.deadline | date:'dd MMM yyyy' }}</span>
+        <button class="apply-btn" (click)="openApply(job)">
+          <i class="pi pi-send"></i> Apply Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Apply Dialog -->
+<p-dialog [(visible)]="showApply" [modal]="true" [closable]="!applying"
+  [header]="'Apply — ' + (selectedJob?.title || '')" [style]="{ width: '480px' }">
+
+  <div *ngIf="success" class="apply-success">
+    <i class="pi pi-check-circle"></i>
+    <h3>Application Submitted!</h3>
+    <p>We will review your application and contact you soon at <strong>{{ form.email }}</strong>.</p>
+    <button class="apply-btn" (click)="showApply = false">Close</button>
+  </div>
+
+  <form *ngIf="!success" class="apply-form" (ngSubmit)="submit()">
+    <div class="apply-job-info" *ngIf="selectedJob">
+      <strong>{{ selectedJob.title }}</strong> · {{ selectedJob.department }} · {{ selectedJob.location }}
+    </div>
+
+    <div class="field">
+      <label>Full Name *</label>
+      <input pInputText [(ngModel)]="form.fullName" name="fullName" placeholder="Your full name" required />
+    </div>
+    <div class="field">
+      <label>Email *</label>
+      <input pInputText [(ngModel)]="form.email" name="email" type="email" placeholder="your@email.com" required />
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <input pInputText [(ngModel)]="form.phone" name="phone" placeholder="+91 98765 43210" />
+    </div>
+    <div class="field">
+      <label>Resume (PDF) *</label>
+      <div class="file-upload">
+        <input type="file" accept=".pdf" (change)="onFileChange($event)" #fileInput style="display:none" />
+        <button type="button" class="file-btn" (click)="fileInput.click()">
+          <i class="pi pi-upload"></i> {{ resumeFile ? resumeFile.name : 'Choose PDF file' }}
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="errorMsg" class="apply-error">
+      <i class="pi pi-exclamation-triangle"></i> {{ errorMsg }}
+    </div>
+
+    <div class="apply-actions">
+      <button type="button" class="cancel-btn" (click)="showApply = false" [disabled]="applying">Cancel</button>
+      <button type="submit" class="apply-btn" [disabled]="applying">
+        <i class="pi" [class.pi-send]="!applying" [class.pi-spin]="applying" [class.pi-spinner]="applying"></i>
+        {{ applying ? 'Submitting…' : 'Submit Application' }}
+      </button>
+    </div>
+  </form>
+</p-dialog>

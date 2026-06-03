@@ -1,7 +1,15 @@
 <div class="page-container">
   <div class="page-header">
     <h2>Job Postings</h2>
-    <p-button label="Post New Job" icon="pi pi-plus" (onClick)="showDialog=true; form=emptyForm()"></p-button>
+    <div class="header-controls">
+      <p-button label="Copy Apply Link" icon="pi pi-link" severity="secondary" (onClick)="copyApplyLink()"></p-button>
+      <p-button label="Post New Job" icon="pi pi-plus" (onClick)="showDialog=true; form=emptyForm()"></p-button>
+    </div>
+  </div>
+
+  <!-- Copy link toast -->
+  <div *ngIf="linkCopied" style="background:#d1fae5;color:#065f46;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;font-size:0.875rem">
+    <i class="pi pi-check-circle"></i> Share this link with candidates to apply: <strong>http://localhost:4200/careers</strong>
   </div>
 
   <p-table [value]="jobs" [loading]="loading" stripedRows>

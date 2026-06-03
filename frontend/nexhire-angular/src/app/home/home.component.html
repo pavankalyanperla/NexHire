@@ -1,0 +1,86 @@
+<div class="home-page">
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="brand-badge">
+        <i class="pi pi-bolt"></i> AI-Powered HR Platform
+      </div>
+      <h1 class="hero-title">Nex<span class="accent">Hire</span></h1>
+      <p class="hero-tagline">AI-Powered Next Generation HRMS</p>
+      <p class="hero-sub">
+        Streamline your HR operations with the power of Artificial Intelligence.
+        From hiring to payroll — everything in one platform.
+      </p>
+      <div class="hero-actions">
+        <button class="btn-primary" (click)="goToLogin()">
+          <i class="pi pi-sign-in"></i> Login to Portal
+        </button>
+        <button class="btn-outline" (click)="goToCareers()">
+          <i class="pi pi-briefcase"></i> View Open Positions
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">7</span><span class="stat-lbl">AI Features</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-num">4</span><span class="stat-lbl">Role Portals</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-num">5</span><span class="stat-lbl">Microservices</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="hero-card">
+        <div class="card-row"><i class="pi pi-check-circle text-green"></i> Resume screened — 92% match</div>
+        <div class="card-row"><i class="pi pi-users text-blue"></i> 24 employees present today</div>
+        <div class="card-row"><i class="pi pi-wallet text-purple"></i> Payroll processed ₹12.4L</div>
+        <div class="card-row"><i class="pi pi-star text-orange"></i> 4.2 avg team performance</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="features-header">
+      <h2>Everything you need to manage HR with AI</h2>
+      <p>Built for modern enterprises — scalable, fast, and intelligent.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card" *ngFor="let f of features">
+        <div class="feature-icon">
+          <i class="pi {{ f.icon }}"></i>
+        </div>
+        <h3>{{ f.title }}</h3>
+        <p>{{ f.desc }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="cta-banner">
+    <h2>Ready to transform your HR operations?</h2>
+    <p>Login to your portal or explore open positions.</p>
+    <div class="cta-actions">
+      <button class="btn-primary" (click)="goToLogin()">
+        <i class="pi pi-sign-in"></i> Get Started
+      </button>
+      <button class="btn-outline-white" (click)="goToCareers()">
+        <i class="pi pi-search"></i> Browse Jobs
+      </button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="home-footer">
+    <div class="footer-inner">
+      <span class="footer-brand"><i class="pi pi-bolt"></i> NexHire</span>
+      <span>© 2026 NexHire. Built for FWC IT Services Hackathon.</span>
+      <div class="footer-links">
+        <a (click)="goToLogin()">Portal Login</a>
+        <a (click)="goToCareers()">Careers</a>
+      </div>
+    </div>
+  </footer>
+
+</div>

@@ -14,6 +14,7 @@ public class JobPostingsController : ControllerBase
     public JobPostingsController(IJobPostingService svc) => _svc = svc;
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll() => Ok(await _svc.GetAllJobPostingsAsync());
 
     [HttpGet("{id:int}")]

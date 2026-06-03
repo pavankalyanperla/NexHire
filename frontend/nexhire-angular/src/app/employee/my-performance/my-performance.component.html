@@ -41,28 +41,28 @@
   <!-- AI Insights Dialog -->
   <p-dialog [(visible)]="showInsights" header="AI Performance Insights" [modal]="true" [style]="{ width: '500px' }">
     <div *ngIf="insightsLoading" class="loading-state"><p-progressSpinner></p-progressSpinner><p>Analyzing performance with Claude AI...</p></div>
-    <div *ngIf="!insightsLoading && insights" class="insights-container">
+    <div *ngIf="!insightsLoading && aiInsights" class="insights-container">
       <div class="insights-level">
-        <p-tag [value]="insights.performance_level" [severity]="levelSeverity(insights.performance_level)" styleClass="text-lg px-3 py-2"></p-tag>
+        <p-tag [value]="aiInsights.performance_level" [severity]="levelSeverity(aiInsights.performance_level)" styleClass="text-lg px-3 py-2"></p-tag>
       </div>
-      <p class="insights-summary">{{ insights.overall_insight }}</p>
+      <p class="insights-summary">{{ aiInsights.overall_insight }}</p>
       <div class="insights-grid">
         <div class="insights-section">
           <h4><i class="pi pi-thumbs-up"></i> Strengths</h4>
-          <ul><li *ngFor="let s of getList(insights, 'strengths')">{{ s }}</li></ul>
+          <ul><li *ngFor="let s of getList(aiInsights, 'strengths')">{{ s }}</li></ul>
         </div>
         <div class="insights-section">
           <h4><i class="pi pi-arrow-up"></i> Improvement Areas</h4>
-          <ul><li *ngFor="let a of getList(insights, 'improvement_areas')">{{ a }}</li></ul>
+          <ul><li *ngFor="let a of getList(aiInsights, 'improvement_areas')">{{ a }}</li></ul>
         </div>
       </div>
       <div class="insights-section">
         <h4><i class="pi pi-check-circle"></i> Recommended Actions</h4>
-        <ul><li *ngFor="let a of getList(insights, 'recommended_actions')">{{ a }}</li></ul>
+        <ul><li *ngFor="let a of getList(aiInsights, 'recommended_actions')">{{ a }}</li></ul>
       </div>
       <div class="insights-section">
         <h4><i class="pi pi-flag"></i> Next Month Goals</h4>
-        <ul><li *ngFor="let g of getList(insights, 'next_month_goals')">{{ g }}</li></ul>
+        <ul><li *ngFor="let g of getList(aiInsights, 'next_month_goals')">{{ g }}</li></ul>
       </div>
     </div>
     <ng-template pTemplate="footer">
