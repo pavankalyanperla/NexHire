@@ -109,3 +109,40 @@
   gap: 0.5rem;
   align-items: center;
 }
+
+.voice-hint {
+  text-align: center;
+  font-size: 0.65rem;
+  color: #9ca3af;
+  padding-bottom: 0.375rem;
+}
+
+.mic-button {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #f3f4f6; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #6b7280; flex-shrink: 0;
+  transition: background 0.2s;
+  &:hover { background: #ede9fe; color: #6366f1; }
+  i { font-size: 1rem; }
+  &.listening {
+    background: #ef4444; color: white;
+    animation: pulse-red 1s infinite;
+  }
+}
+
+@keyframes pulse-red {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.15); opacity: 0.8; }
+}
+
+.chatbot-toast {
+  position: fixed;
+  bottom: 9rem; right: 2rem;
+  background: #1f2937; color: white;
+  padding: 0.625rem 1rem; border-radius: 8px;
+  font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem;
+  z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  &.toast-warn  { background: #f59e0b; }
+  &.toast-error { background: #ef4444; }
+}

@@ -10,42 +10,72 @@
     </div>
   </div>
 
-  <!-- Stats -->
-  <div class="stats-grid">
+  <!-- Overview Stats -->
+  <div *ngIf="overview" class="stats-grid">
     <div class="stat-card blue">
       <i class="pi pi-wallet stat-icon"></i>
       <div class="stat-body">
-        <div class="stat-value">₹{{ payslip?.netSalary | number:'1.0-0' }}</div>
-        <div class="stat-label">Net Salary (This Month)</div>
+        <div class="stat-value">{{ formatSalary(overview.currentMonthNetSalary) }}</div>
+        <div class="stat-label">Net Salary This Month</div>
       </div>
     </div>
     <div class="stat-card green">
+      <i class="pi pi-check-circle stat-icon"></i>
+      <div class="stat-body">
+        <div class="stat-value">{{ overview.presentDaysThisMonth }}</div>
+        <div class="stat-label">Present Days</div>
+      </div>
+    </div>
+    <div class="stat-card orange">
+      <i class="pi pi-calendar-times stat-icon"></i>
+      <div class="stat-body">
+        <div class="stat-value">{{ overview.absentDaysThisMonth }}</div>
+        <div class="stat-label">Absent Days</div>
+      </div>
+    </div>
+    <div class="stat-card purple">
       <i class="pi pi-star stat-icon"></i>
       <div class="stat-body">
-        <div class="stat-value">{{ lastRating || '—' }}/5</div>
+        <div class="stat-value">{{ overview.lastPerformanceRating || '—' }}/5</div>
         <div class="stat-label">Last Performance</div>
       </div>
     </div>
   </div>
 
-  <!-- Attendance Card -->
-  <p-card header="Today's Attendance" styleClass="mb-4">
-    <div class="attendance-actions">
-      <div class="attendance-status" *ngIf="todayRecord">
-        <p>Check In: <strong>{{ todayRecord.checkInTime || '—' }}</strong></p>
-        <p>Check Out: <strong>{{ todayRecord.checkOutTime || '—' }}</strong></p>
-        <p *ngIf="todayRecord.workingHours">Working Hours: <strong>{{ todayRecord.workingHours | number:'1.1-1' }}h</strong></p>
+  <!-- Attendance Rate & Today -->
+  <div class="dashboard-grid">
+    <p-card header="Monthly Attendance">
+      <div *ngIf="overview" class="att-month-summary">
+        <div class="att-pct-ring">
+          <div class="att-pct-circle">
+            <span class="att-pct-num">{{ overview.attendancePercentage }}%</span>
+            <span class="att-pct-lbl">This Month</span>
+          </div>
+        </div>
+        <div class="att-breakdown">
+          <div class="att-item"><span class="dot green"></span> Present: <strong>{{ overview.presentDaysThisMonth }}</strong></div>
+          <div class="att-item"><span class="dot red"></span> Absent: <strong>{{ overview.absentDaysThisMonth }}</strong></div>
+          <div class="att-item"><span class="dot orange"></span> On Leave: <strong>{{ overview.leaveDaysThisMonth }}</strong></div>
+          <div class="att-item"><span class="dot blue-dot"></span> Pending Leaves: <strong>{{ overview.pendingLeaveRequests }}</strong></div>
+        </div>
       </div>
-      <div class="attendance-status" *ngIf="!todayRecord">
-        <p class="text-muted">Not checked in yet today</p>
-      </div>
-      <div class="attendance-btns">
-        <p-button label="Check In" icon="pi pi-sign-in" severity="success" [loading]="actionLoading" [disabled]="checkedIn" (onClick)="checkIn()" styleClass="mr-2"></p-button>
-        <p-button label="Check Out" icon="pi pi-sign-out" severity="warn" [loading]="actionLoading" [disabled]="!checkedIn || checkedOut" (onClick)="checkOut()"></p-button>
-      </div>
-    </div>
-  </p-card>
+    </p-card>
 
+    <p-card header="Today's Attendance">
+      <div class="attendance-actions">
+        <div class="attendance-status">
+          <p *ngIf="todayRecord">Check In: <strong>{{ todayRecord.checkInTime || '—' }}</strong></p>
+          <p *ngIf="todayRecord">Check Out: <strong>{{ todayRecord.checkOutTime || '—' }}</strong></p>
+          <p *ngIf="todayRecord?.workingHours">Hours: <strong>{{ todayRecord?.workingHours | number:'1.1-1' }}h</strong></p>
+          <p *ngIf="!todayRecord" class="text-muted">Not checked in yet today</p>
+        </div>
+        <div class="attendance-btns">
+          <p-button label="Check In" icon="pi pi-sign-in" severity="success" [loading]="actionLoading" [disabled]="checkedIn" (onClick)="checkIn()" styleClass="mr-2"></p-button>
+          <p-button label="Check Out" icon="pi pi-sign-out" severity="warn" [loading]="actionLoading" [disabled]="!checkedIn || checkedOut" (onClick)="checkOut()"></p-button>
+        </div>
+      </div>
+    </p-card>
+  </div>
 </div>
 <ng-template #loadingTpl>
   <div class="loading-state"><p-progressSpinner></p-progressSpinner></div>

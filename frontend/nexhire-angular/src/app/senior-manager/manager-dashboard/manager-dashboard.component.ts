@@ -1,28 +1,31 @@
 import { Component, OnInit } from '@angular/core';
 import { HrmsService } from '../../core/services/hrms.service';
-import { EmployeeDto, AttendanceDto, LeaveRequestDto, PerformanceReviewDto } from '../../core/models/hrms.model';
+import { AuthService } from '../../core/services/auth.service';
+import { ManagerOverviewDto, AttendanceDto } from '../../core/models/hrms.model';
 
 @Component({ selector: 'app-manager-dashboard', templateUrl: './manager-dashboard.component.html', standalone: false })
 export class ManagerDashboardComponent implements OnInit {
-  employees: EmployeeDto[] = [];
+  overview: ManagerOverviewDto | null = null;
   todayAttendance: AttendanceDto[] = [];
-  pendingLeaves: LeaveRequestDto[] = [];
-  pendingReviews: PerformanceReviewDto[] = [];
   loading = true;
 
-  constructor(private hrms: HrmsService) {}
+  constructor(private hrms: HrmsService, private auth: AuthService) {}
+
   ngOnInit() {
+    const userId = this.auth.getCurrentUser()?.userId;
+    if (!userId) { this.loading = false; return; }
+
     Promise.all([
-      this.hrms.getEmployees().toPromise(),
-      this.hrms.getTodayAttendance().toPromise(),
-      this.hrms.getPendingLeaves().toPromise(),
-      this.hrms.getPendingReviews().toPromise()
-    ]).then(([emps, att, leaves, reviews]) => {
-      this.employees      = emps || [];
-      this.todayAttendance= att || [];
-      this.pendingLeaves  = leaves || [];
-      this.pendingReviews = reviews || [];
+      this.hrms.getManagerOverview(userId).toPromise(),
+      this.hrms.getTodayAttendance().toPromise()
+    ]).then(([ov, att]) => {
+      this.overview       = ov ?? null;
+      this.todayAttendance= att ?? [];
       this.loading = false;
     }).catch(() => this.loading = false);
+  }
+
+  ratingStars(rating: number): number[] {
+    return Array.from({ length: 5 }, (_, i) => i + 1);
   }
 }

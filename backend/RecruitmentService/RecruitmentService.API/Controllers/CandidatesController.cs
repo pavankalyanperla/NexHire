@@ -1,8 +1,10 @@
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RecruitmentService.Application.DTOs;
 using RecruitmentService.Application.Interfaces;
+using RecruitmentService.Infrastructure.Data;
 
 namespace RecruitmentService.API.Controllers;
 
@@ -13,12 +15,14 @@ public class CandidatesController : ControllerBase
     private readonly ICandidateService _svc;
     private readonly IHttpClientFactory _http;
     private readonly IWebHostEnvironment _env;
+    private readonly RecruitmentDbContext _ctx;
 
-    public CandidatesController(ICandidateService svc, IHttpClientFactory http, IWebHostEnvironment env)
+    public CandidatesController(ICandidateService svc, IHttpClientFactory http, IWebHostEnvironment env, RecruitmentDbContext ctx)
     {
         _svc  = svc;
         _http  = http;
         _env   = env;
+        _ctx   = ctx;
     }
 
     [HttpGet("job/{jobId:int}")]
@@ -39,12 +43,31 @@ public class CandidatesController : ControllerBase
     public async Task<IActionResult> Ranked(int jobId) =>
         Ok(await _svc.GetRankedCandidatesAsync(jobId));
 
+    [HttpGet("stats")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Stats()
+    {
+        var apps = await _ctx.CandidateApplications.ToListAsync();
+        var jobs = await _ctx.JobPostings.ToListAsync();
+
+        var openPositions     = jobs.Count(j => j.Status == "Open");
+        var totalApplications = apps.Count;
+        var shortlisted       = apps.Count(a => a.Status == "Shortlisted");
+        var hired             = apps.Count(a => a.Status == "Hired");
+        var scored            = apps.Where(a => a.AIMatchScore.HasValue).ToList();
+        var avgAiScore        = scored.Count > 0
+            ? (int)Math.Round(scored.Average(a => a.AIMatchScore!.Value))
+            : 0;
+
+        return Ok(new { openPositions, totalApplications, shortlisted, hired, averageAIScore = avgAiScore });
+    }
+
     [HttpPost("apply")]
     [AllowAnonymous]
     public async Task<IActionResult> Apply([FromForm] CreateApplicationDto dto, IFormFile? resume)
     {
         string resumeFilePath = "";
-        string resumeText = "";
+        string resumeText     = "";
 
         if (resume is not null && resume.Length > 0)
         {
@@ -58,12 +81,11 @@ public class CandidatesController : ControllerBase
 
             resumeFilePath = $"/Uploads/Resumes/{fileName}";
 
-            // Call ResumeAI to extract text
             try
             {
                 var client = _http.CreateClient("ResumeAI");
                 using var formContent = new MultipartFormDataContent();
-                var fileBytes = await System.IO.File.ReadAllBytesAsync(fullPath);
+                var fileBytes   = await System.IO.File.ReadAllBytesAsync(fullPath);
                 var fileContent = new ByteArrayContent(fileBytes);
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
                 formContent.Add(fileContent, "file", resume.FileName);
@@ -71,7 +93,7 @@ public class CandidatesController : ControllerBase
                 var response = await client.PostAsync("/api/resume/extract-text", formContent);
                 if (response.IsSuccessStatusCode)
                 {
-                    var json = await response.Content.ReadAsStringAsync();
+                    var json   = await response.Content.ReadAsStringAsync();
                     var result = System.Text.Json.JsonDocument.Parse(json);
                     resumeText = result.RootElement.GetProperty("text").GetString() ?? "";
                 }

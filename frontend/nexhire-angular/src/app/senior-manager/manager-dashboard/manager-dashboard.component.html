@@ -1,26 +1,65 @@
 <div class="dashboard-page">
   <div *ngIf="loading"><p-progressSpinner></p-progressSpinner></div>
-  <ng-container *ngIf="!loading">
+  <ng-container *ngIf="!loading && overview">
     <div class="stats-grid">
-      <div class="stat-card blue"><i class="pi pi-users stat-icon"></i><div class="stat-body"><div class="stat-value">{{ employees.length }}</div><div class="stat-label">Team Size</div></div></div>
-      <div class="stat-card green"><i class="pi pi-check-circle stat-icon"></i><div class="stat-body"><div class="stat-value">{{ todayAttendance.length }}</div><div class="stat-label">Present Today</div></div></div>
-      <div class="stat-card orange"><i class="pi pi-clock stat-icon"></i><div class="stat-body"><div class="stat-value">{{ pendingLeaves.length }}</div><div class="stat-label">Pending Leaves</div></div></div>
-      <div class="stat-card purple"><i class="pi pi-star stat-icon"></i><div class="stat-body"><div class="stat-value">{{ pendingReviews.length }}</div><div class="stat-label">Pending Reviews</div></div></div>
+      <div class="stat-card blue">
+        <i class="pi pi-users stat-icon"></i>
+        <div class="stat-body"><div class="stat-value">{{ overview.teamSize }}</div><div class="stat-label">Team Size</div></div>
+      </div>
+      <div class="stat-card green">
+        <i class="pi pi-check-circle stat-icon"></i>
+        <div class="stat-body"><div class="stat-value">{{ overview.presentToday }}</div><div class="stat-label">Present Today</div></div>
+      </div>
+      <div class="stat-card orange">
+        <i class="pi pi-calendar-times stat-icon"></i>
+        <div class="stat-body"><div class="stat-value">{{ overview.onLeave }}</div><div class="stat-label">On Leave</div></div>
+      </div>
+      <div class="stat-card red">
+        <i class="pi pi-bell stat-icon"></i>
+        <div class="stat-body">
+          <div class="stat-value">
+            {{ overview.pendingApprovals }}
+            <span *ngIf="overview.pendingApprovals > 0" class="pending-dot"></span>
+          </div>
+          <div class="stat-label">Pending Approvals</div>
+        </div>
+      </div>
     </div>
-    <p-card header="Team Attendance Today">
-      <p-table [value]="todayAttendance">
-        <ng-template pTemplate="header"><tr><th>Employee</th><th>Check In</th><th>Check Out</th><th>Hours</th><th>Status</th></tr></ng-template>
-        <ng-template pTemplate="body" let-a>
-          <tr>
-            <td>{{ a.employeeName }}</td>
-            <td>{{ a.checkInTime || '—' }}</td>
-            <td>{{ a.checkOutTime || '—' }}</td>
-            <td>{{ a.workingHours ? (a.workingHours | number:'1.1-1') + 'h' : '—' }}</td>
-            <td><p-tag [value]="a.status" [severity]="a.status==='Present'?'success':'warn'"></p-tag></td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage"><tr><td colspan="5" class="text-center">No attendance records for today yet</td></tr></ng-template>
-      </p-table>
-    </p-card>
+
+    <div class="dashboard-grid">
+      <p-card header="Performance Overview">
+        <div class="perf-overview">
+          <div class="perf-rating-row">
+            <span class="perf-label">Avg Team Rating</span>
+            <div class="star-row">
+              <i *ngFor="let s of ratingStars(5)" class="pi"
+                 [class.pi-star-fill]="s <= overview.averagePerformanceRating"
+                 [class.pi-star]="s > overview.averagePerformanceRating"
+                 [style.color]="s <= overview.averagePerformanceRating ? '#f59e0b' : '#d1d5db'"></i>
+              <span class="rating-val">{{ overview.averagePerformanceRating }}</span>
+            </div>
+          </div>
+          <div class="perf-meta">
+            <span>Pending Reviews: </span>
+            <p-badge [value]="overview.pendingReviews.toString()" [severity]="overview.pendingReviews > 0 ? 'warn' : 'success'"></p-badge>
+          </div>
+        </div>
+      </p-card>
+
+      <p-card header="Team Attendance Today">
+        <p-table [value]="todayAttendance">
+          <ng-template pTemplate="header"><tr><th>Employee</th><th>Check In</th><th>Hours</th><th>Status</th></tr></ng-template>
+          <ng-template pTemplate="body" let-a>
+            <tr>
+              <td>{{ a.employeeName }}</td>
+              <td>{{ a.checkInTime || '—' }}</td>
+              <td>{{ a.workingHours ? (a.workingHours | number:'1.1-1') + 'h' : '—' }}</td>
+              <td><p-tag [value]="a.status" [severity]="a.status==='Present'?'success':'warn'"></p-tag></td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage"><tr><td colspan="4" class="text-center">No attendance records for today yet</td></tr></ng-template>
+        </p-table>
+      </p-card>
+    </div>
   </ng-container>
 </div>

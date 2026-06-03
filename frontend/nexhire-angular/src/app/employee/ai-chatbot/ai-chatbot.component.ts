@@ -10,6 +10,10 @@ export class AIChatbotComponent {
   messages: ChatMessage[] = [];
   inputText = '';
   loading = false;
+  isListening = false;
+  toastMsg = '';
+  toastSev = '';
+  showToastMsg = false;
 
   suggestions = [
     'How many annual leaves do I get?',
@@ -42,4 +46,41 @@ export class AIChatbotComponent {
   }
 
   onKey(e: KeyboardEvent) { if (e.key === 'Enter') this.send(); }
+
+  startVoiceInput() {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      this.showToast('Voice input not supported. Use Chrome.', 'warn');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    this.isListening = true;
+    recognition.start();
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      this.inputText = transcript;
+      this.isListening = false;
+      this.send();
+    };
+
+    recognition.onerror = () => {
+      this.isListening = false;
+      this.showToast('Voice input error. Please try again.', 'error');
+    };
+
+    recognition.onend = () => { this.isListening = false; };
+  }
+
+  showToast(msg: string, sev: string) {
+    this.toastMsg = msg;
+    this.toastSev = sev;
+    this.showToastMsg = true;
+    setTimeout(() => this.showToastMsg = false, 3000);
+  }
 }

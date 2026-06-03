@@ -12,6 +12,7 @@ public class HRMSDbContext : DbContext
     public DbSet<LeaveRequest> LeaveRequests { get; set; }
     public DbSet<PayrollRecord> PayrollRecords { get; set; }
     public DbSet<PerformanceReview> PerformanceReviews { get; set; }
+    public DbSet<OnboardingRecord> OnboardingRecords { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -60,6 +61,12 @@ public class HRMSDbContext : DbContext
             .HasOne(r => r.Employee)
             .WithMany(e => e.PerformanceReviews)
             .HasForeignKey(r => r.EmployeeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<OnboardingRecord>()
+            .HasOne(o => o.Employee)
+            .WithOne(e => e.OnboardingRecord)
+            .HasForeignKey<OnboardingRecord>(o => o.EmployeeId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

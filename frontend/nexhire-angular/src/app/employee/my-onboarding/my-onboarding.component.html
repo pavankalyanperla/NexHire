@@ -1,0 +1,54 @@
+<div class="page-container">
+  <div class="page-header"><h2>My Onboarding</h2></div>
+
+  <div *ngIf="loading" class="loading-state"><p-progressSpinner></p-progressSpinner></div>
+
+  <div *ngIf="!loading && notFound" class="empty-state">
+    <i class="pi pi-inbox" style="font-size:2.5rem;color:#9ca3af;display:block;margin-bottom:0.75rem"></i>
+    <p>Your onboarding record will be created by HR.</p>
+    <p class="text-muted">Please contact your HR representative if you have questions.</p>
+  </div>
+
+  <ng-container *ngIf="!loading && record">
+    <!-- Status Header -->
+    <div class="onboarding-header">
+      <div>
+        <p-tag [value]="record.status === 'Completed' ? 'Onboarding Complete' : 'In Progress'"
+               [severity]="record.status === 'Completed' ? 'success' : 'warn'" styleClass="text-sm"></p-tag>
+        <div class="mt-2" *ngIf="record.joiningDate">
+          <span class="text-muted">Joining Date: </span>
+          <strong>{{ record.joiningDate | date:'dd MMMM yyyy' }}</strong>
+        </div>
+      </div>
+      <div class="text-right">
+        <div class="offer-badge">
+          Offer: <p-tag [value]="record.offerLetterStatus" [severity]="offerSeverity(record.offerLetterStatus)"></p-tag>
+        </div>
+        <div class="completion-pct">{{ completionPct(record) }}% Complete</div>
+      </div>
+    </div>
+
+    <!-- Completion Bar -->
+    <div class="completion-bar-wrap" style="margin-bottom:1.5rem">
+      <div class="completion-bar-track">
+        <div class="completion-bar-fill" [style.width.%]="completionPct(record)"
+             [class.bar-complete]="completionPct(record)===100"></div>
+      </div>
+      <span class="text-muted" style="font-size:0.8rem">{{ completedItems(record) }}/{{ totalItems }} items completed</span>
+    </div>
+
+    <!-- Checklist -->
+    <div class="onboarding-checklist">
+      <div *ngFor="let item of checkItems(record)" class="check-view-item">
+        <i class="pi" [class.pi-check-circle]="item.done" [class.pi-circle]="!item.done"
+           [style.color]="item.done ? '#10b981' : '#d1d5db'"></i>
+        <span [class.done-text]="item.done">{{ item.label }}</span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <p-card *ngIf="record.notes" header="Notes from HR" styleClass="mt-4">
+      <p class="text-muted">{{ record.notes }}</p>
+    </p-card>
+  </ng-container>
+</div>

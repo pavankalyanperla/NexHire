@@ -16,7 +16,8 @@ export class EmployeeComponent implements OnInit {
     { label: 'Attendance',  icon: 'pi pi-calendar',   link: '/employee/attendance' },
     { label: 'Payslips',    icon: 'pi pi-wallet',     link: '/employee/payslips' },
     { label: 'Leaves',      icon: 'pi pi-clock',      link: '/employee/leaves' },
-    { label: 'Performance', icon: 'pi pi-star',       link: '/employee/performance' }
+    { label: 'Performance', icon: 'pi pi-star',       link: '/employee/performance' },
+    { label: 'Onboarding',  icon: 'pi pi-user-plus',  link: '/employee/onboarding' }
   ];
 
   constructor(private authService: AuthService) {}

@@ -50,3 +50,37 @@ export interface CreateReviewDto {
   selfRating: number; selfComments: string; goals: string;
 }
 export interface UpdateManagerReviewDto { managerRating: number; managerComments: string; status: string; }
+
+export interface CompanyOverviewDto {
+  totalEmployees: number; activeEmployees: number; departments: number;
+  presentToday: number; onLeave: number; newThisMonth: number;
+  departmentBreakdown: { department: string; count: number }[];
+  attendanceRate: number; pendingLeaves: number; payrollThisMonth: number;
+}
+export interface HrOverviewDto {
+  totalEmployees: number; newThisMonth: number;
+  departmentBreakdown: { department: string; count: number }[];
+  openLeaveRequests: number; todayPresent: number; todayAbsent: number;
+}
+export interface ManagerOverviewDto {
+  teamSize: number; presentToday: number; onLeave: number;
+  pendingApprovals: number; pendingReviews: number; averagePerformanceRating: number;
+}
+export interface EmployeeOverviewDto {
+  presentDaysThisMonth: number; absentDaysThisMonth: number; leaveDaysThisMonth: number;
+  attendancePercentage: number; currentMonthNetSalary: number;
+  lastPerformanceRating: number; pendingLeaveRequests: number;
+}
+export interface RecruitmentStatsDto {
+  openPositions: number; totalApplications: number;
+  shortlisted: number; hired: number; averageAIScore: number;
+}
+
+export interface OnboardingRecordDto {
+  id: number; employeeId: number; employeeName: string; department: string;
+  offerLetterStatus: string; offerSentDate: string | null; joiningDate: string | null;
+  idProofSubmitted: boolean; aadharSubmitted: boolean; panCardSubmitted: boolean;
+  bankDetailsSubmitted: boolean; educationCertificatesSubmitted: boolean;
+  laptopAssigned: boolean; emailAccountCreated: boolean; accessCardIssued: boolean;
+  notes: string; status: string; createdAt: string; docsCount: number; itCount: number;
+}

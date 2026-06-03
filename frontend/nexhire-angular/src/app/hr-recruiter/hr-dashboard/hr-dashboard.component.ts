@@ -1,25 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { HrmsService } from '../../core/services/hrms.service';
-import { EmployeeDto, LeaveRequestDto } from '../../core/models/hrms.model';
+import { HrOverviewDto } from '../../core/models/hrms.model';
 
 @Component({ selector: 'app-hr-dashboard', templateUrl: './hr-dashboard.component.html', standalone: false })
 export class HRDashboardComponent implements OnInit {
-  employees: EmployeeDto[] = [];
-  pendingLeaves: LeaveRequestDto[] = [];
+  overview: HrOverviewDto | null = null;
   loading = true;
-  now = new Date();
-
-  get newThisMonth() {
-    return this.employees.filter(e => {
-      const d = new Date(e.createdAt);
-      return d.getMonth() === this.now.getMonth() && d.getFullYear() === this.now.getFullYear();
-    }).length;
-  }
 
   constructor(private hrms: HrmsService) {}
+
   ngOnInit() {
-    Promise.all([this.hrms.getEmployees().toPromise(), this.hrms.getPendingLeaves().toPromise()])
-      .then(([emps, leaves]) => { this.employees = emps || []; this.pendingLeaves = leaves || []; this.loading = false; })
-      .catch(() => this.loading = false);
+    this.hrms.getHrOverview().subscribe({
+      next: o => { this.overview = o; this.loading = false; },
+      error: () => this.loading = false
+    });
+  }
+
+  maxDeptCount(): number {
+    return Math.max(1, ...(this.overview?.departmentBreakdown.map(d => d.count) ?? [1]));
+  }
+  deptPct(count: number): number {
+    return Math.round((count / this.maxDeptCount()) * 100);
   }
 }

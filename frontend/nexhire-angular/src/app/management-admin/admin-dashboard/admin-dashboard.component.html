@@ -1,71 +1,66 @@
 <div class="dashboard-page">
-  <div *ngIf="loading" class="loading-state">
-    <p-progressSpinner></p-progressSpinner>
-  </div>
+  <div *ngIf="loading" class="loading-state"><p-progressSpinner></p-progressSpinner></div>
 
-  <ng-container *ngIf="!loading">
+  <ng-container *ngIf="!loading && overview">
     <!-- Stats Cards -->
     <div class="stats-grid">
       <div class="stat-card blue">
         <i class="pi pi-users stat-icon"></i>
-        <div class="stat-body">
-          <div class="stat-value">{{ employees.length }}</div>
-          <div class="stat-label">Total Employees</div>
-        </div>
+        <div class="stat-body"><div class="stat-value">{{ overview.totalEmployees }}</div><div class="stat-label">Total Employees</div></div>
       </div>
       <div class="stat-card green">
-        <i class="pi pi-building stat-icon"></i>
-        <div class="stat-body">
-          <div class="stat-value">{{ deptSummary.length }}</div>
-          <div class="stat-label">Departments</div>
-        </div>
+        <i class="pi pi-check-circle stat-icon"></i>
+        <div class="stat-body"><div class="stat-value">{{ overview.presentToday }}</div><div class="stat-label">Present Today</div></div>
       </div>
       <div class="stat-card orange">
-        <i class="pi pi-clock stat-icon"></i>
-        <div class="stat-body">
-          <div class="stat-value">{{ onLeaveCount }}</div>
-          <div class="stat-label">Pending Leaves</div>
-        </div>
+        <i class="pi pi-calendar-times stat-icon"></i>
+        <div class="stat-body"><div class="stat-value">{{ overview.onLeave }}</div><div class="stat-label">On Leave</div></div>
       </div>
       <div class="stat-card purple">
-        <i class="pi pi-wallet stat-icon"></i>
-        <div class="stat-body">
-          <div class="stat-value">{{ payroll.length }}</div>
-          <div class="stat-label">Payroll Records</div>
-        </div>
+        <i class="pi pi-building stat-icon"></i>
+        <div class="stat-body"><div class="stat-value">{{ overview.departments }}</div><div class="stat-label">Departments</div></div>
       </div>
     </div>
 
-    <div class="dashboard-grid">
-      <!-- Department Breakdown -->
-      <p-card header="Department Breakdown" styleClass="dash-card">
-        <p-table [value]="deptSummary" [tableStyle]="{ 'min-width': '100%' }">
-          <ng-template pTemplate="header">
-            <tr><th>Department</th><th>Headcount</th></tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-d>
-            <tr><td>{{ d.department }}</td><td><strong>{{ d.count }}</strong></td></tr>
-          </ng-template>
-        </p-table>
+    <!-- Attendance Rate + Payroll Row -->
+    <div class="dashboard-grid" style="margin-bottom:1.5rem">
+      <p-card styleClass="dash-card">
+        <ng-template pTemplate="header"><div class="dash-card-header">Attendance Rate Today</div></ng-template>
+        <div class="attendance-rate-display">
+          <div class="rate-circle" [class.rate-good]="overview.attendanceRate>=75" [class.rate-mid]="overview.attendanceRate>=50 && overview.attendanceRate<75" [class.rate-low]="overview.attendanceRate<50">
+            <span class="rate-pct">{{ overview.attendanceRate }}%</span>
+            <span class="rate-sub">{{ overview.presentToday }} / {{ overview.activeEmployees }} present</span>
+          </div>
+        </div>
+        <div class="mini-stats">
+          <div><span class="mini-label">New This Month</span><span class="mini-value green">+{{ overview.newThisMonth }}</span></div>
+          <div><span class="mini-label">Pending Leaves</span><span class="mini-value orange">{{ overview.pendingLeaves }}</span></div>
+        </div>
       </p-card>
 
-      <!-- Pending Leaves -->
-      <p-card header="Pending Leave Requests" styleClass="dash-card">
-        <div *ngIf="pendingLeaves.length === 0" class="empty-state">No pending leaves</div>
-        <p-table *ngIf="pendingLeaves.length > 0" [value]="pendingLeaves">
-          <ng-template pTemplate="header">
-            <tr><th>Employee</th><th>Type</th><th>From</th><th>Status</th></tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-l>
-            <tr>
-              <td>{{ l.employeeName }}</td>
-              <td>{{ l.leaveType }}</td>
-              <td>{{ l.fromDate | date:'dd MMM' }}</td>
-              <td><p-tag [value]="l.status" severity="warn"></p-tag></td>
-            </tr>
-          </ng-template>
-        </p-table>
+      <p-card styleClass="dash-card">
+        <ng-template pTemplate="header"><div class="dash-card-header">Payroll This Month</div></ng-template>
+        <div class="payroll-total">{{ formatSalary(overview.payrollThisMonth) }}</div>
+        <div class="text-muted" style="font-size:0.8rem;text-align:center">Total net salaries disbursed</div>
+        <div *ngIf="recruitment" class="recruit-mini">
+          <div><span class="mini-label">Open Positions</span><span class="mini-value blue">{{ recruitment.openPositions }}</span></div>
+          <div><span class="mini-label">Applicants</span><span class="mini-value blue">{{ recruitment.totalApplications }}</span></div>
+          <div><span class="mini-label">Shortlisted</span><span class="mini-value green">{{ recruitment.shortlisted }}</span></div>
+        </div>
       </p-card>
     </div>
+
+    <!-- Department Breakdown -->
+    <p-card header="Department Breakdown">
+      <div class="dept-bars">
+        <div *ngFor="let d of overview.departmentBreakdown" class="dept-bar-row">
+          <span class="dept-name">{{ d.department }}</span>
+          <div class="dept-bar-track">
+            <div class="dept-bar-fill" [style.width.%]="deptPct(d.count)"></div>
+          </div>
+          <span class="dept-count">{{ d.count }}</span>
+        </div>
+      </div>
+    </p-card>
   </ng-container>
 </div>

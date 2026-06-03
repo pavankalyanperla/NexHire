@@ -9,6 +9,7 @@ import { MyPayslipsComponent } from './my-payslips/my-payslips.component';
 import { MyLeavesComponent } from './my-leaves/my-leaves.component';
 import { MyPerformanceComponent } from './my-performance/my-performance.component';
 import { AIChatbotComponent } from './ai-chatbot/ai-chatbot.component';
+import { MyOnboardingComponent } from './my-onboarding/my-onboarding.component';
 
 const routes: Routes = [{
   path: '',
@@ -18,13 +19,15 @@ const routes: Routes = [{
     { path: 'attendance', component: MyAttendanceComponent },
     { path: 'payslips', component: MyPayslipsComponent },
     { path: 'leaves', component: MyLeavesComponent },
-    { path: 'performance', component: MyPerformanceComponent }
+    { path: 'performance', component: MyPerformanceComponent },
+    { path: 'onboarding', component: MyOnboardingComponent }
   ]
 }];
 
 @NgModule({
   declarations: [EmployeeComponent, EmployeeDashboardComponent, MyAttendanceComponent,
-    MyPayslipsComponent, MyLeavesComponent, MyPerformanceComponent, AIChatbotComponent],
+    MyPayslipsComponent, MyLeavesComponent, MyPerformanceComponent, AIChatbotComponent,
+    MyOnboardingComponent],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })
 export class EmployeeModule {}

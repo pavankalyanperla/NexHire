@@ -7,7 +7,9 @@ import {
   AttendanceDto, AttendanceSummaryDto,
   LeaveRequestDto, CreateLeaveDto, UpdateLeaveStatusDto,
   PayrollRecordDto,
-  PerformanceReviewDto, CreateReviewDto, UpdateManagerReviewDto
+  PerformanceReviewDto, CreateReviewDto, UpdateManagerReviewDto,
+  CompanyOverviewDto, HrOverviewDto, ManagerOverviewDto, EmployeeOverviewDto,
+  RecruitmentStatsDto, OnboardingRecordDto
 } from '../models/hrms.model';
 
 @Injectable({ providedIn: 'root' })
@@ -92,5 +94,39 @@ export class HrmsService {
   }
   updateManagerReview(id: number, dto: UpdateManagerReviewDto): Observable<PerformanceReviewDto> {
     return this.http.put<PerformanceReviewDto>(`${this.api}/performance/${id}/manager-review`, dto);
+  }
+
+  // Analytics
+  getCompanyOverview(): Observable<CompanyOverviewDto> {
+    return this.http.get<CompanyOverviewDto>(`${this.api}/analytics/company-overview`);
+  }
+  getHrOverview(): Observable<HrOverviewDto> {
+    return this.http.get<HrOverviewDto>(`${this.api}/analytics/hr-overview`);
+  }
+  getManagerOverview(managerUserId: number): Observable<ManagerOverviewDto> {
+    return this.http.get<ManagerOverviewDto>(`${this.api}/analytics/manager-overview/${managerUserId}`);
+  }
+  getEmployeeOverview(employeeId: number): Observable<EmployeeOverviewDto> {
+    return this.http.get<EmployeeOverviewDto>(`${this.api}/analytics/employee-overview/${employeeId}`);
+  }
+  getRecruitmentStats(): Observable<RecruitmentStatsDto> {
+    return this.http.get<RecruitmentStatsDto>(`${this.api}/analytics/recruitment-stats`);
+  }
+
+  // Onboarding
+  getAllOnboarding(): Observable<OnboardingRecordDto[]> {
+    return this.http.get<OnboardingRecordDto[]>(`${this.api}/onboarding`);
+  }
+  getOnboardingByEmployee(employeeId: number): Observable<OnboardingRecordDto> {
+    return this.http.get<OnboardingRecordDto>(`${this.api}/onboarding/${employeeId}`);
+  }
+  createOnboarding(dto: { employeeId: number; joiningDate: string | null; notes: string }): Observable<OnboardingRecordDto> {
+    return this.http.post<OnboardingRecordDto>(`${this.api}/onboarding`, dto);
+  }
+  updateOnboarding(id: number, dto: any): Observable<OnboardingRecordDto> {
+    return this.http.put<OnboardingRecordDto>(`${this.api}/onboarding/${id}`, dto);
+  }
+  updateOfferStatus(id: number, offerLetterStatus: string): Observable<OnboardingRecordDto> {
+    return this.http.put<OnboardingRecordDto>(`${this.api}/onboarding/${id}/offer-status`, { offerLetterStatus });
   }
 }

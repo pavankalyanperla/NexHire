@@ -1,3 +1,8 @@
+<!-- Toast notification -->
+<div *ngIf="showToastMsg" class="chatbot-toast" [class.toast-warn]="toastSev==='warn'" [class.toast-error]="toastSev==='error'">
+  <i class="pi pi-info-circle"></i> {{ toastMsg }}
+</div>
+
 <!-- Floating Chat Button -->
 <div class="chat-fab" (click)="toggle()">
   <i class="pi pi-comments"></i>
@@ -18,7 +23,6 @@
   </div>
 
   <div class="chat-messages">
-    <!-- Welcome message -->
     <div *ngIf="messages.length === 0" class="chat-welcome">
       <p>Hi! I'm your AI HR assistant. Ask me anything about leaves, salary, work policies, and more.</p>
       <div class="suggestions">
@@ -26,7 +30,6 @@
       </div>
     </div>
 
-    <!-- Message history -->
     <div *ngFor="let msg of messages" class="message" [class.user-msg]="msg.role==='user'" [class.ai-msg]="msg.role==='ai'">
       <div class="message-bubble">
         <p>{{ msg.text }}</p>
@@ -34,7 +37,6 @@
       </div>
     </div>
 
-    <!-- Loading -->
     <div *ngIf="loading" class="ai-msg">
       <div class="message-bubble typing">
         <span class="dot"></span><span class="dot"></span><span class="dot"></span>
@@ -44,6 +46,10 @@
 
   <div class="chat-input">
     <input pInputText [(ngModel)]="inputText" (keyup)="onKey($event)" placeholder="Ask about HR policies..." class="w-full" />
+    <button class="mic-button" [class.listening]="isListening" (click)="startVoiceInput()" title="Click to speak your question">
+      <i class="pi" [class.pi-microphone]="!isListening" [class.pi-circle-fill]="isListening"></i>
+    </button>
     <p-button icon="pi pi-send" (onClick)="send()" [disabled]="loading || !inputText.trim()"></p-button>
   </div>
+  <div class="voice-hint">🎤 Voice input works best in Chrome</div>
 </div>
