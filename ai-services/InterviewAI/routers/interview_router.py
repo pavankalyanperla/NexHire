@@ -4,7 +4,7 @@ import os
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
-import google.generativeai as genai  # type: ignore
+from groq import Groq
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -30,12 +30,36 @@ NexHire HR Policies:
 """
 
 
-def get_gemini_model():
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key or api_key == "your_gemini_api_key_here":
-        raise HTTPException(status_code=500, detail="GEMINI_API_KEY not configured")
-    genai.configure(api_key=api_key)
-    return genai.GenerativeModel("gemini-1.5-flash")
+def get_groq_client():
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="GROQ_API_KEY not configured")
+    return Groq(api_key=api_key)
+
+
+def call_groq(prompt: str, max_tokens: int = 1024) -> str:
+    client = get_groq_client()
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=max_tokens,
+        temperature=0.3
+    )
+    return response.choices[0].message.content
+
+
+def call_groq_chat(system_prompt: str, user_message: str, max_tokens: int = 512) -> str:
+    client = get_groq_client()
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message}
+        ],
+        max_tokens=max_tokens,
+        temperature=0.4
+    )
+    return response.choices[0].message.content
 
 
 def extract_json_from_text(text: str):
@@ -64,8 +88,6 @@ class QuestionRequest(BaseModel):
 
 @router.post("/generate-questions")
 async def generate_questions(request: QuestionRequest):
-    model = get_gemini_model()
-
     prompt = f"""You are a senior technical interviewer at NexHire. Generate interview questions for this candidate and return ONLY valid JSON with no extra text.
 
 JOB: {request.job_title} ({request.experience_level} level)
@@ -93,8 +115,8 @@ Return ONLY this JSON structure:
 }}"""
 
     try:
-        response = model.generate_content(prompt)
-        return extract_json_from_text(response.text)
+        response_text = call_groq(prompt, max_tokens=1024)
+        return extract_json_from_text(response_text)
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=500, detail=f"JSON parse error: {str(e)}")
     except Exception as e:
@@ -116,8 +138,6 @@ class EvaluateRequest(BaseModel):
 
 @router.post("/evaluate-answers")
 async def evaluate_answers(request: EvaluateRequest):
-    model = get_gemini_model()
-
     qa_text = "\n".join([
         f"Q{i+1}: {qa.question}\nA{i+1}: {qa.answer}"
         for i, qa in enumerate(request.questions_and_answers)
@@ -146,8 +166,8 @@ Return ONLY this JSON:
 }}"""
 
     try:
-        response = model.generate_content(prompt)
-        return extract_json_from_text(response.text)
+        response_text = call_groq(prompt, max_tokens=2048)
+        return extract_json_from_text(response_text)
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=500, detail=f"JSON parse error: {str(e)}")
     except Exception as e:
@@ -172,8 +192,6 @@ class PerformanceInsightRequest(BaseModel):
 
 @router.post("/performance-insights")
 async def performance_insights(request: PerformanceInsightRequest):
-    model = get_gemini_model()
-
     prompt = f"""You are an expert HR performance coach at NexHire. Analyze this employee performance review and return ONLY valid JSON with no extra text.
 
 EMPLOYEE: {request.employee_name}
@@ -198,8 +216,8 @@ Return ONLY this JSON:
 }}"""
 
     try:
-        response = model.generate_content(prompt)
-        return extract_json_from_text(response.text)
+        response_text = call_groq(prompt)
+        return extract_json_from_text(response_text)
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=500, detail=f"JSON parse error: {str(e)}")
     except Exception as e:
@@ -217,23 +235,20 @@ class ChatbotRequest(BaseModel):
 
 @router.post("/chatbot")
 async def chatbot(request: ChatbotRequest):
-    model = get_gemini_model()
-
-    prompt = f"""You are NexHire's friendly and professional AI HR Assistant. Answer employee HR policy questions accurately and helpfully.
+    system_prompt = f"""You are NexHire's friendly and professional AI HR Assistant. Answer employee HR policy questions accurately and helpfully.
 
 {HR_POLICY}
 
 Rules:
 - Answer based on the policies above only
-- Be concise and friendly
+- Be concise and friendly (2-4 sentences)
 - If asked about something outside HR policy, say: "I can only assist with HR-related queries. Please contact the HR team for other questions."
-- Address the employee by name when appropriate
+- Address the employee by name when appropriate"""
 
-{request.employee_name} from {request.department} asks: {request.question}"""
+    user_message = f"{request.employee_name} from {request.department} asks: {request.question}"
 
     try:
-        response = model.generate_content(prompt)
-        answer = response.text
+        answer = call_groq_chat(system_prompt, user_message, max_tokens=512)
 
         q_lower = request.question.lower()
         if any(w in q_lower for w in ["leave", "annual", "sick", "casual", "holiday"]):

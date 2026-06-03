@@ -6,18 +6,14 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
-    # Allow type checkers/linters to resolve pdfplumber import without
-    # requiring it at runtime in environments where it's not installed.
     import pdfplumber  # type: ignore
 
 try:
     import pdfplumber  # type: ignore
 except ImportError:
     pdfplumber = None
-try:
-    import google.generativeai as genai  # type: ignore
-except ImportError:
-    genai = None
+
+from groq import Groq
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -25,12 +21,22 @@ load_dotenv()
 router = APIRouter()
 
 
-def get_gemini_model():
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key or api_key == "your_gemini_api_key_here":
-        raise HTTPException(status_code=500, detail="GEMINI_API_KEY not configured")
-    genai.configure(api_key=api_key)
-    return genai.GenerativeModel("gemini-1.5-flash")
+def get_groq_client():
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="GROQ_API_KEY not configured")
+    return Groq(api_key=api_key)
+
+
+def call_groq(prompt: str, max_tokens: int = 1024) -> str:
+    client = get_groq_client()
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=max_tokens,
+        temperature=0.3
+    )
+    return response.choices[0].message.content
 
 
 def extract_json_from_text(text: str):
@@ -80,8 +86,6 @@ class ScreenRequest(BaseModel):
 
 @router.post("/screen")
 async def screen_resume(request: ScreenRequest):
-    model = get_gemini_model()
-
     prompt = f"""You are an expert HR screening AI. Analyze this resume against the job requirements and return ONLY a valid JSON object with no additional text or explanation.
 
 JOB TITLE: {request.job_title}
@@ -104,12 +108,11 @@ Return ONLY this JSON structure, no extra text:
 }}"""
 
     try:
-        response = model.generate_content(prompt)
-        response_text = response.text
+        response_text = call_groq(prompt)
         result = extract_json_from_text(response_text)
         return result
     except json.JSONDecodeError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to parse Gemini response as JSON: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to parse AI response as JSON: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Screening failed: {str(e)}")
 
@@ -132,8 +135,6 @@ class RankRequest(BaseModel):
 
 @router.post("/rank")
 async def rank_candidates(request: RankRequest):
-    model = get_gemini_model()
-
     candidates_text = "\n\n".join([
         f"CANDIDATE {i+1} (ID: {c.application_id}):\nName: {c.candidate_name}\nResume: {c.resume_text[:1000]}"
         for i, c in enumerate(request.candidates)
@@ -161,13 +162,12 @@ Return ONLY this JSON array (one object per candidate):
 ]"""
 
     try:
-        response = model.generate_content(prompt)
-        response_text = response.text
+        response_text = call_groq(prompt, max_tokens=2048)
         result = extract_json_from_text(response_text)
         if isinstance(result, list):
             result.sort(key=lambda x: x.get("match_score", 0), reverse=True)
         return result
     except json.JSONDecodeError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to parse Gemini ranking response: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to parse AI ranking response: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ranking failed: {str(e)}")
