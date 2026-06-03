@@ -14,9 +14,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(interview_router.router, prefix="/api/interview", tags=["Interview"])
+app.include_router(interview_router.router, prefix="/api/interview", tags=["Interview AI"])
 
 
 @app.get("/health")
 def health():
-    return {"status": "healthy", "service": "InterviewAI"}
+    return {"status": "InterviewAI running"}

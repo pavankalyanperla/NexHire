@@ -14,9 +14,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(resume_router.router, prefix="/api/resume", tags=["Resume"])
+app.include_router(resume_router.router, prefix="/api/resume", tags=["Resume AI"])
 
 
 @app.get("/health")
 def health():
-    return {"status": "healthy", "service": "ResumeAI"}
+    return {"status": "ResumeAI running"}

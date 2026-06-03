@@ -1,0 +1,86 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>Candidates — {{ job?.title }}</h2>
+      <p class="text-muted" *ngIf="job">{{ job.department }} · {{ job.experienceLevel }} · {{ job.status }}</p>
+    </div>
+    <p-button label="Rank All with AI" icon="pi pi-sort-amount-down" severity="warn" [loading]="rankLoading" (onClick)="rankAll()"></p-button>
+  </div>
+
+  <p-table [value]="candidates" [loading]="loading" stripedRows>
+    <ng-template pTemplate="header">
+      <tr><th>Name</th><th>Email</th><th>Applied</th><th>AI Score</th><th>Status</th><th>Actions</th></tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-c>
+      <tr>
+        <td><strong>{{ c.candidateName }}</strong></td>
+        <td>{{ c.candidateEmail }}</td>
+        <td>{{ c.appliedAt | date:'dd MMM' }}</td>
+        <td>
+          <p-tag *ngIf="c.aiMatchScore !== null" [value]="c.aiMatchScore + '%'" [severity]="scoreSeverity(c.aiMatchScore)"></p-tag>
+          <span *ngIf="c.aiMatchScore === null" class="text-muted">—</span>
+        </td>
+        <td>
+          <p-select [ngModel]="c.status" [options]="statuses" (ngModelChange)="updateStatus(c.id, $event)" [style]="{ width: '120px' }"></p-select>
+        </td>
+        <td class="action-btns">
+          <p-button icon="pi pi-eye" [text]="true" severity="info" (onClick)="screen(c.id)" pTooltip="AI Screen" styleClass="mr-1"></p-button>
+          <p-button icon="pi pi-question-circle" [text]="true" severity="warn" (onClick)="generateQuestions(c.id)" pTooltip="Generate Questions"></p-button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage"><tr><td colspan="6" class="text-center">No applications yet</td></tr></ng-template>
+  </p-table>
+</div>
+
+<!-- AI Screening Result Dialog -->
+<p-dialog [(visible)]="showScreenDialog" header="AI Resume Screening" [modal]="true" [style]="{ width: '520px' }">
+  <div *ngIf="screenLoading" class="loading-state"><p-progressSpinner></p-progressSpinner></div>
+  <div *ngIf="!screenLoading && screenResult" class="screening-result">
+    <div class="score-circle" [class.score-high]="screenResult.matchScore>=80" [class.score-mid]="screenResult.matchScore>=60 && screenResult.matchScore<80" [class.score-low]="screenResult.matchScore<60">
+      <span class="score-number">{{ screenResult.matchScore }}%</span>
+      <span class="score-label">Match</span>
+    </div>
+    <p-tag [value]="screenResult.recommendation" [severity]="screenResult.matchScore>=80?'success':screenResult.matchScore>=60?'warn':'danger'" styleClass="mb-3 block"></p-tag>
+    <p class="screening-summary">{{ screenResult.summary }}</p>
+    <div class="skills-row">
+      <div>
+        <h5>Matched Skills</h5>
+        <span *ngFor="let s of screenResult.matchedSkills" class="skill-chip matched">{{ s }}</span>
+      </div>
+      <div>
+        <h5>Missing Skills</h5>
+        <span *ngFor="let s of screenResult.missingSkills" class="skill-chip missing">{{ s }}</span>
+      </div>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Close" severity="secondary" (onClick)="showScreenDialog=false"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Interview Questions Dialog -->
+<p-dialog [(visible)]="showQDialog" header="AI Generated Interview Questions" [modal]="true" [style]="{ width: '600px' }">
+  <div *ngIf="qLoading" class="loading-state"><p-progressSpinner></p-progressSpinner></div>
+  <div *ngIf="!qLoading && questions" class="questions-container">
+    <h4>Technical Questions</h4>
+    <div *ngFor="let q of getQList(questions, 'technical_questions')" class="question-item">
+      <span class="q-number">Q{{ q.id }}</span>
+      <span class="q-text">{{ q.question }}</span>
+      <p-tag [value]="q.difficulty" [severity]="q.difficulty==='Hard'?'danger':q.difficulty==='Medium'?'warn':'success'" styleClass="ml-2"></p-tag>
+    </div>
+    <h4 class="mt-4">HR Questions</h4>
+    <div *ngFor="let q of getQList(questions, 'hr_questions')" class="question-item">
+      <span class="q-number">Q{{ q.id }}</span>
+      <span class="q-text">{{ q.question }}</span>
+    </div>
+    <h4 class="mt-4">Scenario Questions</h4>
+    <div *ngFor="let q of getQList(questions, 'scenario_questions')" class="question-item">
+      <span class="q-number">Q{{ q.id }}</span>
+      <span class="q-text">{{ q.question }}</span>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Close" severity="secondary" (onClick)="showQDialog=false"></p-button>
+  </ng-template>
+</p-dialog>

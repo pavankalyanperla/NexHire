@@ -15,8 +15,8 @@ export class ManagementAdminComponent implements OnInit {
     { label: 'Dashboard',   icon: 'pi pi-home',       link: '/admin' },
     { label: 'Employees',   icon: 'pi pi-users',      link: '/admin/employees' },
     { label: 'Payroll',     icon: 'pi pi-wallet',     link: '/admin/payroll' },
-    { label: 'Reports',     icon: 'pi pi-chart-bar',  link: '/admin/reports' },
-    { label: 'Settings',    icon: 'pi pi-cog',        link: '/admin/settings' }
+    { label: 'Recruitment', icon: 'pi pi-briefcase',  link: '/admin/recruitment' },
+    { label: 'Reports',     icon: 'pi pi-chart-bar',  link: '/admin/reports' }
   ];
 
   constructor(private authService: AuthService) {}

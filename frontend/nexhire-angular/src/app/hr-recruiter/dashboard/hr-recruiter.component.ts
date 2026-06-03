@@ -15,7 +15,7 @@ export class HRRecruiterComponent implements OnInit {
     { label: 'Dashboard',   icon: 'pi pi-home',       link: '/hr' },
     { label: 'Employees',   icon: 'pi pi-users',      link: '/hr/employees' },
     { label: 'Attendance',  icon: 'pi pi-calendar',   link: '/hr/attendance' },
-    { label: 'Interviews',  icon: 'pi pi-video',      link: '/hr/interviews' }
+    { label: 'Job Postings',icon: 'pi pi-briefcase',  link: '/hr/jobs' }
   ];
 
   constructor(private authService: AuthService) {}

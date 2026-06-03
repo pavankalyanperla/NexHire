@@ -8,6 +8,7 @@ import { MyAttendanceComponent } from './my-attendance/my-attendance.component';
 import { MyPayslipsComponent } from './my-payslips/my-payslips.component';
 import { MyLeavesComponent } from './my-leaves/my-leaves.component';
 import { MyPerformanceComponent } from './my-performance/my-performance.component';
+import { AIChatbotComponent } from './ai-chatbot/ai-chatbot.component';
 
 const routes: Routes = [{
   path: '',
@@ -22,7 +23,8 @@ const routes: Routes = [{
 }];
 
 @NgModule({
-  declarations: [EmployeeComponent, EmployeeDashboardComponent, MyAttendanceComponent, MyPayslipsComponent, MyLeavesComponent, MyPerformanceComponent],
+  declarations: [EmployeeComponent, EmployeeDashboardComponent, MyAttendanceComponent,
+    MyPayslipsComponent, MyLeavesComponent, MyPerformanceComponent, AIChatbotComponent],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })
 export class EmployeeModule {}

@@ -123,3 +123,31 @@
 
 // Payroll summary bar
 .payroll-summary-bar { background: #ede9fe; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; color: #4c1d95; font-size: 0.9rem; }
+
+// AI Screening styles
+.screening-result { text-align: center; }
+.score-circle { width: 100px; height: 100px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1rem; border: 4px solid currentColor; }
+.score-high { color: #10b981; background: #d1fae5; }
+.score-mid  { color: #f59e0b; background: #fef3c7; }
+.score-low  { color: #ef4444; background: #fee2e2; }
+.score-number { font-size: 1.5rem; font-weight: 700; }
+.score-label  { font-size: 0.7rem; text-transform: uppercase; }
+.screening-summary { color: #6b7280; font-size: 0.875rem; margin: 0.75rem 0; text-align: left; }
+.skills-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; h5 { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; } }
+.skill-chip { display: inline-block; padding: 0.25rem 0.625rem; border-radius: 999px; font-size: 0.75rem; margin: 2px; }
+.skill-chip.matched { background: #d1fae5; color: #065f46; }
+.skill-chip.missing  { background: #fee2e2; color: #991b1b; }
+
+// Questions styles
+.questions-container { max-height: 400px; overflow-y: auto; }
+.question-item { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6; }
+.q-number { background: #ede9fe; color: #6366f1; border-radius: 4px; padding: 0.125rem 0.375rem; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+.q-text { flex: 1; font-size: 0.875rem; }
+.action-btns { white-space: nowrap; }
+
+// AI Insights styles
+.insights-container { max-height: 420px; overflow-y: auto; }
+.insights-level { text-align: center; margin-bottom: 1rem; }
+.insights-summary { color: #374151; font-size: 0.875rem; line-height: 1.6; margin-bottom: 1rem; }
+.insights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.insights-section { margin-bottom: 1rem; h4 { color: #6366f1; font-size: 0.875rem; margin-bottom: 0.5rem; i { margin-right: 0.375rem; } } ul { margin: 0; padding-left: 1.25rem; li { font-size: 0.8125rem; color: #374151; margin-bottom: 0.25rem; line-height: 1.4; } } }

@@ -6,6 +6,7 @@ import { ManagementAdminComponent } from './dashboard/management-admin.component
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 import { EmployeeListComponent } from './employee-list/employee-list.component';
 import { PayrollManagementComponent } from './payroll-management/payroll-management.component';
+import { RecruitmentOverviewComponent } from './recruitment-overview/recruitment-overview.component';
 
 const routes: Routes = [{
   path: '',
@@ -13,12 +14,14 @@ const routes: Routes = [{
   children: [
     { path: '', component: AdminDashboardComponent },
     { path: 'employees', component: EmployeeListComponent },
-    { path: 'payroll', component: PayrollManagementComponent }
+    { path: 'payroll', component: PayrollManagementComponent },
+    { path: 'recruitment', component: RecruitmentOverviewComponent }
   ]
 }];
 
 @NgModule({
-  declarations: [ManagementAdminComponent, AdminDashboardComponent, EmployeeListComponent, PayrollManagementComponent],
+  declarations: [ManagementAdminComponent, AdminDashboardComponent, EmployeeListComponent,
+    PayrollManagementComponent, RecruitmentOverviewComponent],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })
 export class ManagementAdminModule {}

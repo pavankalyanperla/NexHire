@@ -64,17 +64,31 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/hrms/{everything}",
+      "DownstreamPathTemplate": "/api/jobpostings/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5200 }],
-      "UpstreamPathTemplate": "/api/hrms/{everything}",
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5300 }],
+      "UpstreamPathTemplate": "/api/jobpostings/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/recruitment/{everything}",
+      "DownstreamPathTemplate": "/api/jobpostings",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5300 }],
-      "UpstreamPathTemplate": "/api/recruitment/{everything}",
+      "UpstreamPathTemplate": "/api/jobpostings",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/candidates/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5300 }],
+      "UpstreamPathTemplate": "/api/candidates/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/ai/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": 5300 }],
+      "UpstreamPathTemplate": "/api/ai/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     }
   ],

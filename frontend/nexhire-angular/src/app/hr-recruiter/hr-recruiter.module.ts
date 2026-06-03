@@ -1,11 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../shared/shared.module';
+import { TooltipModule } from 'primeng/tooltip';
 
 import { HRRecruiterComponent } from './dashboard/hr-recruiter.component';
 import { HRDashboardComponent } from './hr-dashboard/hr-dashboard.component';
 import { EmployeeManagementComponent } from './employee-management/employee-management.component';
 import { AttendanceOverviewComponent } from './attendance-overview/attendance-overview.component';
+import { JobPostingsComponent } from './job-postings/job-postings.component';
+import { CandidatesComponent } from './candidates/candidates.component';
 
 const routes: Routes = [{
   path: '',
@@ -13,12 +16,15 @@ const routes: Routes = [{
   children: [
     { path: '', component: HRDashboardComponent },
     { path: 'employees', component: EmployeeManagementComponent },
-    { path: 'attendance', component: AttendanceOverviewComponent }
+    { path: 'attendance', component: AttendanceOverviewComponent },
+    { path: 'jobs', component: JobPostingsComponent },
+    { path: 'jobs/:jobId/candidates', component: CandidatesComponent }
   ]
 }];
 
 @NgModule({
-  declarations: [HRRecruiterComponent, HRDashboardComponent, EmployeeManagementComponent, AttendanceOverviewComponent],
-  imports: [SharedModule, RouterModule.forChild(routes)]
+  declarations: [HRRecruiterComponent, HRDashboardComponent, EmployeeManagementComponent,
+    AttendanceOverviewComponent, JobPostingsComponent, CandidatesComponent],
+  imports: [SharedModule, TooltipModule, RouterModule.forChild(routes)]
 })
 export class HRRecruiterModule {}

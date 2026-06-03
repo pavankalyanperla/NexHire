@@ -1,0 +1,49 @@
+<!-- Floating Chat Button -->
+<div class="chat-fab" (click)="toggle()">
+  <i class="pi pi-comments"></i>
+  <span class="chat-fab-label">HR AI</span>
+</div>
+
+<!-- Chat Panel -->
+<div class="chat-panel" [class.open]="isOpen">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <i class="pi pi-robot chat-avatar"></i>
+      <div>
+        <div class="chat-title">NexHire HR Assistant</div>
+        <div class="chat-subtitle">Ask me anything about HR policies</div>
+      </div>
+    </div>
+    <button class="chat-close" (click)="toggle()"><i class="pi pi-times"></i></button>
+  </div>
+
+  <div class="chat-messages">
+    <!-- Welcome message -->
+    <div *ngIf="messages.length === 0" class="chat-welcome">
+      <p>Hi! I'm your AI HR assistant. Ask me anything about leaves, salary, work policies, and more.</p>
+      <div class="suggestions">
+        <button *ngFor="let s of suggestions" class="suggestion-chip" (click)="send(s)">{{ s }}</button>
+      </div>
+    </div>
+
+    <!-- Message history -->
+    <div *ngFor="let msg of messages" class="message" [class.user-msg]="msg.role==='user'" [class.ai-msg]="msg.role==='ai'">
+      <div class="message-bubble">
+        <p>{{ msg.text }}</p>
+        <span *ngIf="msg.category" class="msg-category">{{ msg.category }}</span>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="ai-msg">
+      <div class="message-bubble typing">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <input pInputText [(ngModel)]="inputText" (keyup)="onKey($event)" placeholder="Ask about HR policies..." class="w-full" />
+    <p-button icon="pi pi-send" (onClick)="send()" [disabled]="loading || !inputText.trim()"></p-button>
+  </div>
+</div>

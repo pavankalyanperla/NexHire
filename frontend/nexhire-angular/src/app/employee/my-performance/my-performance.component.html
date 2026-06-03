@@ -4,7 +4,7 @@
     <p-button label="Submit Self Review" icon="pi pi-star" (onClick)="openSelfReview()"></p-button>
   </div>
   <p-table [value]="reviews" [loading]="loading" stripedRows>
-    <ng-template pTemplate="header"><tr><th>Period</th><th>Self Rating</th><th>Manager Rating</th><th>Self Comments</th><th>Manager Feedback</th><th>Status</th></tr></ng-template>
+    <ng-template pTemplate="header"><tr><th>Period</th><th>Self Rating</th><th>Manager Rating</th><th>Self Comments</th><th>Manager Feedback</th><th>Status</th><th>AI Insights</th></tr></ng-template>
     <ng-template pTemplate="body" let-r>
       <tr>
         <td>{{ monthName(r.month) }} {{ r.year }}</td>
@@ -16,29 +16,57 @@
         <td>{{ r.selfComments }}</td>
         <td>{{ r.managerComments || '—' }}</td>
         <td><p-tag [value]="r.status" [severity]="r.status==='Reviewed'?'success':'warn'"></p-tag></td>
+        <td>
+          <p-button *ngIf="r.status==='Reviewed'" label="AI Insights" icon="pi pi-sparkles" severity="info" size="small" (onClick)="getAIInsights(r)"></p-button>
+          <span *ngIf="r.status!=='Reviewed'" class="text-muted">—</span>
+        </td>
       </tr>
     </ng-template>
-    <ng-template pTemplate="emptymessage"><tr><td colspan="6" class="text-center">No performance reviews yet</td></tr></ng-template>
+    <ng-template pTemplate="emptymessage"><tr><td colspan="7" class="text-center">No performance reviews yet</td></tr></ng-template>
   </p-table>
 
+  <!-- Self Review Dialog -->
   <p-dialog [(visible)]="showDialog" header="Submit Self Performance Review" [modal]="true" [style]="{ width: '440px' }">
     <div class="form-grid">
-      <div class="field">
-        <label>Self Rating (1-5)</label>
-        <p-rating [(ngModel)]="selfRating"></p-rating>
-      </div>
-      <div class="field">
-        <label>Comments / Achievements</label>
-        <textarea pTextarea [(ngModel)]="selfComments" rows="3" class="w-full" placeholder="Describe your achievements this month..."></textarea>
-      </div>
-      <div class="field">
-        <label>Goals for Next Month</label>
-        <textarea pTextarea [(ngModel)]="goals" rows="2" class="w-full" placeholder="Set your targets..."></textarea>
-      </div>
+      <div class="field"><label>Self Rating (1-5)</label><p-rating [(ngModel)]="selfRating"></p-rating></div>
+      <div class="field"><label>Comments / Achievements</label><textarea pTextarea [(ngModel)]="selfComments" rows="3" class="w-full" placeholder="Describe your achievements..."></textarea></div>
+      <div class="field"><label>Goals for Next Month</label><textarea pTextarea [(ngModel)]="goals" rows="2" class="w-full" placeholder="Set your targets..."></textarea></div>
     </div>
     <ng-template pTemplate="footer">
       <p-button label="Cancel" severity="secondary" (onClick)="showDialog=false"></p-button>
       <p-button label="Submit Review" (onClick)="submit()"></p-button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- AI Insights Dialog -->
+  <p-dialog [(visible)]="showInsights" header="AI Performance Insights" [modal]="true" [style]="{ width: '500px' }">
+    <div *ngIf="insightsLoading" class="loading-state"><p-progressSpinner></p-progressSpinner><p>Analyzing performance with Claude AI...</p></div>
+    <div *ngIf="!insightsLoading && insights" class="insights-container">
+      <div class="insights-level">
+        <p-tag [value]="insights.performance_level" [severity]="levelSeverity(insights.performance_level)" styleClass="text-lg px-3 py-2"></p-tag>
+      </div>
+      <p class="insights-summary">{{ insights.overall_insight }}</p>
+      <div class="insights-grid">
+        <div class="insights-section">
+          <h4><i class="pi pi-thumbs-up"></i> Strengths</h4>
+          <ul><li *ngFor="let s of getList(insights, 'strengths')">{{ s }}</li></ul>
+        </div>
+        <div class="insights-section">
+          <h4><i class="pi pi-arrow-up"></i> Improvement Areas</h4>
+          <ul><li *ngFor="let a of getList(insights, 'improvement_areas')">{{ a }}</li></ul>
+        </div>
+      </div>
+      <div class="insights-section">
+        <h4><i class="pi pi-check-circle"></i> Recommended Actions</h4>
+        <ul><li *ngFor="let a of getList(insights, 'recommended_actions')">{{ a }}</li></ul>
+      </div>
+      <div class="insights-section">
+        <h4><i class="pi pi-flag"></i> Next Month Goals</h4>
+        <ul><li *ngFor="let g of getList(insights, 'next_month_goals')">{{ g }}</li></ul>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <p-button label="Close" severity="secondary" (onClick)="showInsights=false"></p-button>
     </ng-template>
   </p-dialog>
 </div>
