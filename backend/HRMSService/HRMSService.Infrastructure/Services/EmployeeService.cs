@@ -22,7 +22,13 @@ public class EmployeeService : IEmployeeService
 
     public async Task<EmployeeDto?> GetEmployeeByUserIdAsync(int userId)
     {
-        var e = await _ctx.Employees.FirstOrDefaultAsync(x => x.UserId == userId);
+        if (userId <= 0) return null;
+        // OrderByDescending so create-from-hire records (higher Id) take precedence over
+        // any seeded demo employee that may share the same UserId due to legacy data
+        var e = await _ctx.Employees
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.Id)
+            .FirstOrDefaultAsync();
         return e is null ? null : ToDto(e);
     }
 

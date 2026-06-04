@@ -1,4 +1,15 @@
-<div class="dashboard-page" *ngIf="!loading; else loadingTpl">
+<div *ngIf="employeeNotFound && !loading" class="not-found-card"
+     style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+            padding:60px 24px;text-align:center;gap:16px">
+  <i class="pi pi-hourglass" style="font-size:3rem;color:#f59e0b"></i>
+  <h3 style="margin:0;font-size:1.3rem;color:#92400e">Profile Setup In Progress</h3>
+  <p style="color:#78716c;max-width:380px;margin:0">
+    Your employee profile is being set up by HR.<br>
+    Please contact HR if this persists beyond your joining date.
+  </p>
+</div>
+
+<div class="dashboard-page" *ngIf="!loading && !employeeNotFound; else loadingTpl">
 
   <!-- Profile Card -->
   <div class="profile-banner" *ngIf="employee">

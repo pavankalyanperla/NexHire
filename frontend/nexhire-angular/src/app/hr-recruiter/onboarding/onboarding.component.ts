@@ -172,57 +172,76 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
   }
 
   createEmployeeAccount(record: any) {
-    if (!record.candidateEmail && !record.employeeName) {
+    const candidateName  = record.candidateName  || record.employeeName;
+    const candidateEmail = record.candidateEmail || '';
+    if (!candidateName) {
       this.showToast('No candidate information found on this record.', 'error');
       return;
     }
 
     this.creatingAccount[record.id] = true;
 
+    const dept = (record.department && record.department !== 'New Hire')
+      ? record.department : 'General';
+
     const accountPayload = {
-      fullName:      record.candidateName  || record.employeeName,
-      personalEmail: record.candidateEmail || '',
-      department:    record.department     || 'General',
-      designation:   record.designation   || 'Employee'
+      fullName:      candidateName,
+      personalEmail: candidateEmail,
+      department:    dept,
+      designation:   record.designation || 'Employee'
     };
 
     // Step 1 — create login account in IdentityService
     this.http.post<any>(`${environment.apiUrl}/auth/create-employee-account`, accountPayload).subscribe({
       next: (accountResponse: any) => {
+        // Handle both camelCase and PascalCase in case serialiser varies
+        const userId = accountResponse.userId ?? accountResponse.UserId ?? accountResponse.id;
+        console.log('[CreateAccount] IdentityService response:', accountResponse, '→ userId:', userId);
+
+        if (!userId) {
+          this.creatingAccount[record.id] = false;
+          this.showToast('Account created but userId missing from response — contact admin.', 'warn');
+          this.cdr.detectChanges();
+          return;
+        }
 
         // Step 2 — create employee record in HRMSService
         const employeePayload = {
-          userId:      accountResponse.userId,
-          fullName:    accountResponse.fullName,
-          email:       accountResponse.email,
+          userId:      userId,
+          fullName:    accountResponse.fullName ?? accountResponse.FullName ?? candidateName,
+          email:       accountResponse.email    ?? accountResponse.Email,
           department:  accountPayload.department,
           designation: accountPayload.designation,
           role:        'Employee',
           joiningDate: record.joiningDate || new Date().toISOString()
         };
 
+        console.log('[CreateAccount] Creating HRMS employee record:', employeePayload);
+
         this.http.post<any>(`${environment.apiUrl}/employees/create-from-hire`, employeePayload).subscribe({
-          next: () => {
+          next: (empResponse: any) => {
+            console.log('[CreateAccount] Employee record created:', empResponse);
             this.accountCreated[record.id]  = true;
             this.creatingAccount[record.id] = false;
             this.showToast(
-              `Account created! Login: ${accountResponse.email} — Credentials sent to ${accountPayload.personalEmail || 'employee'}`,
+              `Account created! Login: ${accountResponse.email ?? accountResponse.Email} — Credentials sent to ${candidateEmail || 'employee'}`,
               'success'
             );
             this.cdr.detectChanges();
           },
-          error: () => {
+          error: (err: any) => {
+            console.error('[CreateAccount] HRMS employee record failed:', err);
             this.accountCreated[record.id]  = true;
             this.creatingAccount[record.id] = false;
             this.showToast(
-              `Account created (${accountResponse.email}) — employee profile setup pending. Ask admin to check HRMSService.`,
+              `Account created (${accountResponse.email ?? accountResponse.Email}) — employee profile setup failed: ${err.error?.message || 'unknown error'}`,
               'warn'
             );
             this.cdr.detectChanges();
           }
         });
       },
-      error: err => {
+      error: (err: any) => {
         this.creatingAccount[record.id] = false;
         this.showToast(err.error?.message || 'Failed to create account.', 'error');
         this.cdr.detectChanges();

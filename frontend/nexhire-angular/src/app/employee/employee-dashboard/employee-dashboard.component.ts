@@ -11,6 +11,7 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
   loading = true;
   actionLoading = false;
   dataLoaded = false;
+  employeeNotFound = false;
 
   get checkedIn() { return !!this.todayRecord?.checkInTime; }
   get checkedOut() { return !!this.todayRecord?.checkOutTime; }
@@ -28,8 +29,15 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
     if (!userId) { this.loading = false; return; }
 
     this.loading = true;
+    this.employeeNotFound = false;
     this.hrms.getEmployeeByUserId(userId).subscribe({
       next: emp => {
+        if (!emp) {
+          this.employeeNotFound = true;
+          this.loading = false;
+          this.cdr.detectChanges();
+          return;
+        }
         this.employee = emp;
         Promise.all([
           this.hrms.getTodayAttendance().toPromise(),
@@ -42,7 +50,11 @@ export class EmployeeDashboardComponent implements OnInit, AfterViewInit {
           this.cdr.detectChanges();
         }).catch(() => { this.loading = false; this.cdr.detectChanges(); });
       },
-      error: () => { this.loading = false; this.cdr.detectChanges(); }
+      error: () => {
+        this.employeeNotFound = true;
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 

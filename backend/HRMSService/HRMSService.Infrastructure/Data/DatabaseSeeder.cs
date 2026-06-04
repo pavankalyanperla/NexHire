@@ -13,13 +13,15 @@ public static class DatabaseSeeder
 
         var employees = new List<Employee>
         {
+            // UserId maps to IdentityDB: 1=Admin, 2=Manager, 3=HR, 4=Employee demo account
+            // Demo-only employees (no login account) use UserId=0 to avoid collisions
             new() { UserId=4, EmployeeCode="NX-001", FullName="Alice Johnson",  Email="alice@nexhire.com",  Phone="9100000001", Department="Engineering", Designation="Senior Developer",  Role="Employee",        JoiningDate=joinDate, BaseSalary=85000, Status="Active", CreatedAt=now },
-            new() { UserId=5, EmployeeCode="NX-002", FullName="Bob Smith",      Email="bob@nexhire.com",    Phone="9100000002", Department="Engineering", Designation="Junior Developer",  Role="Employee",        JoiningDate=joinDate, BaseSalary=55000, Status="Active", CreatedAt=now },
+            new() { UserId=0, EmployeeCode="NX-002", FullName="Bob Smith",      Email="bob@nexhire.com",    Phone="9100000002", Department="Engineering", Designation="Junior Developer",  Role="Employee",        JoiningDate=joinDate, BaseSalary=55000, Status="Active", CreatedAt=now },
             new() { UserId=3, EmployeeCode="NX-003", FullName="Carol White",    Email="carol@nexhire.com",  Phone="9100000003", Department="HR",          Designation="HR Executive",      Role="HRRecruiter",     JoiningDate=joinDate, BaseSalary=60000, Status="Active", CreatedAt=now },
             new() { UserId=2, EmployeeCode="NX-004", FullName="David Brown",    Email="david@nexhire.com",  Phone="9100000004", Department="HR",          Designation="HR Manager",        Role="SeniorManager",   JoiningDate=joinDate, BaseSalary=75000, Status="Active", CreatedAt=now },
-            new() { UserId=6, EmployeeCode="NX-005", FullName="Eva Green",      Email="eva@nexhire.com",    Phone="9100000005", Department="Finance",     Designation="Accountant",        Role="Employee",        JoiningDate=joinDate, BaseSalary=65000, Status="Active", CreatedAt=now },
-            new() { UserId=7, EmployeeCode="NX-006", FullName="Frank Lee",      Email="frank@nexhire.com",  Phone="9100000006", Department="Finance",     Designation="Finance Manager",   Role="SeniorManager",   JoiningDate=joinDate, BaseSalary=80000, Status="Active", CreatedAt=now },
-            new() { UserId=8, EmployeeCode="NX-007", FullName="Grace Kim",      Email="grace@nexhire.com",  Phone="9100000007", Department="Operations",  Designation="Operations Lead",   Role="SeniorManager",   JoiningDate=joinDate, BaseSalary=70000, Status="Active", CreatedAt=now },
+            new() { UserId=0, EmployeeCode="NX-005", FullName="Eva Green",      Email="eva@nexhire.com",    Phone="9100000005", Department="Finance",     Designation="Accountant",        Role="Employee",        JoiningDate=joinDate, BaseSalary=65000, Status="Active", CreatedAt=now },
+            new() { UserId=0, EmployeeCode="NX-006", FullName="Frank Lee",      Email="frank@nexhire.com",  Phone="9100000006", Department="Finance",     Designation="Finance Manager",   Role="SeniorManager",   JoiningDate=joinDate, BaseSalary=80000, Status="Active", CreatedAt=now },
+            new() { UserId=0, EmployeeCode="NX-007", FullName="Grace Kim",      Email="grace@nexhire.com",  Phone="9100000007", Department="Operations",  Designation="Operations Lead",   Role="SeniorManager",   JoiningDate=joinDate, BaseSalary=70000, Status="Active", CreatedAt=now },
             new() { UserId=1, EmployeeCode="NX-008", FullName="Henry Wilson",   Email="henry@nexhire.com",  Phone="9100000008", Department="Operations",  Designation="Admin",             Role="ManagementAdmin", JoiningDate=joinDate, BaseSalary=90000, Status="Active", CreatedAt=now }
         };
 
