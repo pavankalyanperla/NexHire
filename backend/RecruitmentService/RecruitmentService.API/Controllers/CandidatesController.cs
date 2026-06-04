@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RecruitmentService.Application.DTOs;
 using RecruitmentService.Application.Interfaces;
 using RecruitmentService.Infrastructure.Data;
+using RecruitmentService.Infrastructure.Services;
 
 namespace RecruitmentService.API.Controllers;
 
@@ -16,13 +17,18 @@ public class CandidatesController : ControllerBase
     private readonly IHttpClientFactory _http;
     private readonly IWebHostEnvironment _env;
     private readonly RecruitmentDbContext _ctx;
+    private readonly EmailService _email;
 
-    public CandidatesController(ICandidateService svc, IHttpClientFactory http, IWebHostEnvironment env, RecruitmentDbContext ctx)
+    public CandidatesController(
+        ICandidateService svc, IHttpClientFactory http,
+        IWebHostEnvironment env, RecruitmentDbContext ctx,
+        EmailService email)
     {
-        _svc  = svc;
+        _svc   = svc;
         _http  = http;
         _env   = env;
         _ctx   = ctx;
+        _email = email;
     }
 
     [HttpGet("job/{jobId:int}")]
@@ -102,6 +108,21 @@ public class CandidatesController : ControllerBase
         }
 
         var application = await _svc.CreateApplicationAsync(dto, resumeFilePath, resumeText);
+
+        // Send application received email
+        try
+        {
+            var job = await _ctx.JobPostings.FindAsync(dto.JobPostingId);
+            if (job is not null)
+            {
+                await _email.SendEmailAsync(
+                    application.CandidateEmail, application.CandidateName,
+                    $"Application Received — {job.Title}",
+                    _email.GetApplicationReceivedEmail(application.CandidateName, job.Title));
+            }
+        }
+        catch { /* email failure must not break response */ }
+
         return Ok(application);
     }
 
@@ -109,7 +130,38 @@ public class CandidatesController : ControllerBase
     [Authorize(Roles = "ManagementAdmin,HRRecruiter")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateApplicationStatusDto dto)
     {
-        try { return Ok(await _svc.UpdateApplicationStatusAsync(id, dto)); }
+        try
+        {
+            var app = await _svc.GetApplicationByIdAsync(id);
+            if (app is null) return NotFound(new { message = "Application not found." });
+
+            var updated = await _svc.UpdateApplicationStatusAsync(id, dto);
+
+            // Send status-change email
+            switch (dto.Status)
+            {
+                case "Shortlisted":
+                    await _email.SendEmailAsync(
+                        app.CandidateEmail, app.CandidateName,
+                        $"Shortlisted — {app.JobTitle}",
+                        _email.GetShortlistedEmail(app.CandidateName, app.JobTitle));
+                    break;
+                case "Hired":
+                    await _email.SendEmailAsync(
+                        app.CandidateEmail, app.CandidateName,
+                        "Welcome to NexHire — Offer Letter",
+                        _email.GetHiredEmail(app.CandidateName, app.JobTitle));
+                    break;
+                case "Rejected":
+                    await _email.SendEmailAsync(
+                        app.CandidateEmail, app.CandidateName,
+                        $"Application Update — {app.JobTitle}",
+                        _email.GetRejectedEmail(app.CandidateName, app.JobTitle));
+                    break;
+            }
+
+            return Ok(updated);
+        }
         catch (InvalidOperationException ex) { return NotFound(new { message = ex.Message }); }
     }
 }

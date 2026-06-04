@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RecruitmentService.Application.DTOs;
 using RecruitmentService.Application.Interfaces;
+using RecruitmentService.Infrastructure.Services;
 
 namespace RecruitmentService.API.Controllers;
 
@@ -15,12 +16,16 @@ public class AIRecruitmentController : ControllerBase
     private readonly ICandidateService _candidateSvc;
     private readonly IJobPostingService _jobSvc;
     private readonly IHttpClientFactory _http;
+    private readonly EmailService _email;
 
-    public AIRecruitmentController(ICandidateService candidateSvc, IJobPostingService jobSvc, IHttpClientFactory http)
+    public AIRecruitmentController(
+        ICandidateService candidateSvc, IJobPostingService jobSvc,
+        IHttpClientFactory http, EmailService email)
     {
         _candidateSvc = candidateSvc;
         _jobSvc       = jobSvc;
         _http         = http;
+        _email        = email;
     }
 
     [HttpPost("screen/{applicationId:int}")]
@@ -161,11 +166,18 @@ public class AIRecruitmentController : ControllerBase
 
         try
         {
-            var response     = await client.PostAsync("/api/interview/generate-questions", content);
+            var response      = await client.PostAsync("/api/interview/generate-questions", content);
             var questionsJson = await response.Content.ReadAsStringAsync();
             if (!response.IsSuccessStatusCode)
                 return StatusCode(502, new { message = "AI question generation error", detail = questionsJson });
             await _candidateSvc.SaveInterviewQuestionsAsync(applicationId, questionsJson);
+
+            // Notify candidate that interview has been scheduled
+            await _email.SendEmailAsync(
+                app.CandidateEmail, app.CandidateName,
+                $"Interview Scheduled — {job.Title}",
+                _email.GetInterviewScheduledEmail(app.CandidateName, job.Title));
+
             return Ok(JsonDocument.Parse(questionsJson).RootElement);
         }
         catch (Exception ex)

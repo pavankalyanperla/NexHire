@@ -6,6 +6,7 @@ using Microsoft.OpenApi;
 using RecruitmentService.Application.Interfaces;
 using RecruitmentService.Infrastructure.Data;
 using RecruitmentService.Infrastructure.Services;
+using EmailService = RecruitmentService.Infrastructure.Services.EmailService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddDbContext<RecruitmentDbContext>(o =>
 
 builder.Services.AddScoped<IJobPostingService, JobPostingService>();
 builder.Services.AddScoped<ICandidateService,  CandidateService>();
+builder.Services.AddScoped<EmailService>();
 
 builder.Services.AddHttpClient("ResumeAI", c =>
     c.BaseAddress = new Uri(builder.Configuration["AIServices:ResumeAIUrl"]!));

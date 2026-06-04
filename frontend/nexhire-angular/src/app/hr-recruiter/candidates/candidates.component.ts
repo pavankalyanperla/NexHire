@@ -28,6 +28,7 @@ export class CandidatesComponent implements OnInit, AfterViewInit {
   answerInputs: { question: string; answer: string }[] = [];
   evaluationResult: any = null;
   showEvaluationResult = false;
+  questionsLoading: { [key: number]: boolean } = {};
 
   statusOptions = [
     { label: 'Applied',     value: 'Applied' },
@@ -105,24 +106,41 @@ export class CandidatesComponent implements OnInit, AfterViewInit {
   }
 
   generateQuestions(applicationId: number) {
-    this.qLoading = true;
+    this.questionsLoading[applicationId] = true;
     if (!this.showCandidatePanel) {
       this.showQDialog = true;
+      this.questions = null;
     }
-    this.questions = null;
     this.cdr.detectChanges();
 
     this.recruitment.generateInterviewQuestions(applicationId).subscribe({
       next: result => {
         this.questions = result;
-        this.qLoading = false;
+        this.questionsLoading[applicationId] = false;
         this.dataLoaded = false;
-        this.loadCandidates(() => this.refreshPanelIfOpen(applicationId));
+        this.loadCandidatesAndRefreshSelected(applicationId);
         this.cdr.detectChanges();
       },
       error: err => {
         console.error('Questions error:', err);
-        this.qLoading = false;
+        this.questionsLoading[applicationId] = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadCandidatesAndRefreshSelected(applicationId?: number) {
+    this.recruitment.getApplicationsByJob(this.jobId).subscribe({
+      next: data => {
+        this.candidates = data;
+        this.dataLoaded = true;
+        if (applicationId && this.showCandidatePanel) {
+          const updated = this.candidates.find(c => c.id === applicationId);
+          if (updated) {
+            this.selectedCandidate = updated;
+            this.buildAnswerInputs(updated);
+          }
+        }
         this.cdr.detectChanges();
       }
     });
@@ -190,8 +208,13 @@ export class CandidatesComponent implements OnInit, AfterViewInit {
 
   getResumeUrl(filePath: string): string {
     if (!filePath) return '';
-    const filename = filePath.split('\\').pop() || filePath.split('/').pop() || '';
-    return `http://localhost:5300/Uploads/Resumes/${encodeURIComponent(filename)}`;
+    // Handle /Uploads/Resumes/file.pdf, C:\path\file.pdf, or just file.pdf
+    const filename = filePath
+      .replace(/\\/g, '/')
+      .split('/')
+      .filter(p => p.length > 0)
+      .pop() ?? '';
+    return `http://localhost:5300/Uploads/Resumes/${filename}`;
   }
 
   viewResume(candidate: any) {

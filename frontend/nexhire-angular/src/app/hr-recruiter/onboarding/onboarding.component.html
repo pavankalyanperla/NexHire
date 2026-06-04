@@ -43,12 +43,24 @@
 </div>
 
 <!-- Create Dialog -->
-<p-dialog [(visible)]="showCreateDialog" header="Create Onboarding Record" [modal]="true" [style]="{ width: '400px' }">
+<p-dialog [(visible)]="showCreateDialog" header="Create Onboarding Record" [modal]="true" [style]="{ width: '440px' }">
   <div class="form-grid">
     <div class="field">
-      <label>Employee</label>
-      <p-select [(ngModel)]="createForm.employeeId" [options]="employeesWithoutOnboarding()"
-        optionLabel="fullName" optionValue="id" placeholder="Select employee" class="w-full"></p-select>
+      <label>Hired Candidate</label>
+      <p-select [options]="hiredCandidates"
+        optionLabel="candidateName"
+        [ngModel]="selectedHiredCandidate"
+        (onChange)="onCandidateSelect($event.value)"
+        appendTo="body"
+        placeholder="Select hired candidate" class="w-full">
+      </p-select>
+      <small *ngIf="hiredCandidates.length === 0" style="color:#888">
+        No hired candidates yet. Mark a candidate as Hired in the pipeline first.
+      </small>
+    </div>
+    <div class="field">
+      <label>Candidate Email</label>
+      <input pInputText [(ngModel)]="createForm.candidateEmail" class="w-full" placeholder="Auto-filled from selection" />
     </div>
     <div class="field">
       <label>Joining Date</label>

@@ -6,12 +6,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HRMSService.API.Controllers;
 
-public record CreateOnboardingDto(int EmployeeId, DateTime? JoiningDate, string Notes);
+public record CreateOnboardingDto(
+    int? EmployeeId,
+    string CandidateName,
+    string CandidateEmail,
+    DateTime? JoiningDate,
+    string Notes);
+
 public record UpdateOnboardingDto(
     string OfferLetterStatus, bool IdProofSubmitted, bool AadharSubmitted,
     bool PanCardSubmitted, bool BankDetailsSubmitted, bool EducationCertificatesSubmitted,
     bool LaptopAssigned, bool EmailAccountCreated, bool AccessCardIssued,
     string Notes, string Status, DateTime? JoiningDate);
+
 public record UpdateOfferStatusDto(string OfferLetterStatus);
 
 [ApiController]
@@ -47,19 +54,28 @@ public class OnboardingController : ControllerBase
     [Authorize(Roles = "ManagementAdmin,HRRecruiter")]
     public async Task<IActionResult> Create([FromBody] CreateOnboardingDto dto)
     {
-        var exists = await _ctx.OnboardingRecords.AnyAsync(o => o.EmployeeId == dto.EmployeeId);
-        if (exists) return BadRequest(new { message = "Onboarding record already exists for this employee." });
+        // Uniqueness check only for existing employees
+        if (dto.EmployeeId.HasValue && dto.EmployeeId.Value > 0)
+        {
+            var exists = await _ctx.OnboardingRecords.AnyAsync(o => o.EmployeeId == dto.EmployeeId);
+            if (exists) return BadRequest(new { message = "Onboarding record already exists for this employee." });
+        }
 
         var record = new OnboardingRecord
         {
-            EmployeeId   = dto.EmployeeId,
-            JoiningDate  = dto.JoiningDate,
-            Notes        = dto.Notes ?? string.Empty,
-            CreatedAt    = DateTime.UtcNow
+            EmployeeId     = dto.EmployeeId is > 0 ? dto.EmployeeId : null,
+            CandidateName  = dto.CandidateName ?? string.Empty,
+            CandidateEmail = dto.CandidateEmail ?? string.Empty,
+            JoiningDate    = dto.JoiningDate,
+            Notes          = dto.Notes ?? string.Empty,
+            CreatedAt      = DateTime.UtcNow
         };
         _ctx.OnboardingRecords.Add(record);
         await _ctx.SaveChangesAsync();
-        await _ctx.Entry(record).Reference(o => o.Employee).LoadAsync();
+
+        if (record.EmployeeId.HasValue)
+            await _ctx.Entry(record).Reference(o => o.Employee).LoadAsync();
+
         return Ok(ToDto(record));
     }
 
@@ -83,7 +99,6 @@ public class OnboardingController : ControllerBase
         record.Status                          = dto.Status;
         if (dto.JoiningDate.HasValue) record.JoiningDate = dto.JoiningDate;
 
-        // Auto-complete if all items done
         var allDocsDone = record.IdProofSubmitted && record.AadharSubmitted && record.PanCardSubmitted
                        && record.BankDetailsSubmitted && record.EducationCertificatesSubmitted;
         var allItDone   = record.LaptopAssigned && record.EmailAccountCreated && record.AccessCardIssued;
@@ -111,8 +126,10 @@ public class OnboardingController : ControllerBase
     private static object ToDto(OnboardingRecord o) => new
     {
         o.Id, o.EmployeeId,
-        employeeName           = o.Employee?.FullName ?? "",
-        department             = o.Employee?.Department ?? "",
+        employeeName           = o.Employee?.FullName ?? o.CandidateName,
+        department             = o.Employee?.Department ?? "New Hire",
+        candidateName          = o.CandidateName,
+        candidateEmail         = o.CandidateEmail,
         o.OfferLetterStatus, o.OfferSentDate, o.JoiningDate,
         o.IdProofSubmitted, o.AadharSubmitted, o.PanCardSubmitted,
         o.BankDetailsSubmitted, o.EducationCertificatesSubmitted,

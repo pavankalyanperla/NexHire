@@ -154,7 +154,8 @@
       </div>
       <p-button
         [label]="selectedCandidate.interviewQuestions ? 'Regenerate Questions' : 'Generate Questions'"
-        icon="pi pi-list" size="small" severity="secondary" [loading]="qLoading"
+        icon="pi pi-list" size="small" severity="secondary"
+        [loading]="questionsLoading[selectedCandidate.id]"
         (onClick)="generateQuestions(selectedCandidate.id)">
       </p-button>
     </div>
@@ -162,7 +163,7 @@
     <p-divider></p-divider>
 
     <!-- Step 3: Answer Evaluation -->
-    <div class="pipeline-step" *ngIf="selectedCandidate.interviewQuestions && answerInputs.length > 0">
+    <div class="pipeline-step" *ngIf="selectedCandidate?.interviewQuestions && answerInputs.length > 0">
       <div class="step-header">
         <i class="pi pi-check-square" style="color:#0ea5e9"></i>
         <strong>Step 3 — Evaluate Answers</strong>

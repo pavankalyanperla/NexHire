@@ -120,7 +120,7 @@ export class HrmsService {
   getOnboardingByEmployee(employeeId: number): Observable<OnboardingRecordDto> {
     return this.http.get<OnboardingRecordDto>(`${this.api}/onboarding/${employeeId}`);
   }
-  createOnboarding(dto: { employeeId: number; joiningDate: string | null; notes: string }): Observable<OnboardingRecordDto> {
+  createOnboarding(dto: { employeeId?: number; candidateName: string; candidateEmail: string; joiningDate: string | null; notes: string }): Observable<OnboardingRecordDto> {
     return this.http.post<OnboardingRecordDto>(`${this.api}/onboarding`, dto);
   }
   updateOnboarding(id: number, dto: any): Observable<OnboardingRecordDto> {

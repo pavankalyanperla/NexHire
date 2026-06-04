@@ -3,7 +3,9 @@ namespace HRMSService.Domain.Entities;
 public class OnboardingRecord
 {
     public int Id { get; set; }
-    public int EmployeeId { get; set; }
+    public int? EmployeeId { get; set; }
+    public string CandidateName { get; set; } = string.Empty;
+    public string CandidateEmail { get; set; } = string.Empty;
     public string OfferLetterStatus { get; set; } = "Pending";
     public DateTime? OfferSentDate { get; set; }
     public DateTime? JoiningDate { get; set; }
@@ -18,5 +20,5 @@ public class OnboardingRecord
     public string Notes { get; set; } = string.Empty;
     public string Status { get; set; } = "InProgress";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public Employee Employee { get; set; } = null!;
+    public Employee? Employee { get; set; }
 }

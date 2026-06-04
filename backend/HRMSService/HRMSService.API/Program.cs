@@ -68,6 +68,45 @@ using (var scope = app.Services.CreateScope())
 {
     var ctx = scope.ServiceProvider.GetRequiredService<HRMSDbContext>();
     ctx.Database.EnsureCreated();
+
+    // Idempotent schema migration: support onboarding records for new hires not yet in Employees table
+    try
+    {
+        ctx.Database.ExecuteSqlRaw(@"
+            IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_OnboardingRecords_Employees_EmployeeId')
+                ALTER TABLE OnboardingRecords DROP CONSTRAINT FK_OnboardingRecords_Employees_EmployeeId");
+
+        ctx.Database.ExecuteSqlRaw(@"
+            IF EXISTS (
+                SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_NAME='OnboardingRecords' AND COLUMN_NAME='EmployeeId' AND IS_NULLABLE='NO'
+            )
+            ALTER TABLE OnboardingRecords ALTER COLUMN EmployeeId INT NULL");
+
+        ctx.Database.ExecuteSqlRaw(@"
+            IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_OnboardingRecords_Employees_EmployeeId')
+                ALTER TABLE OnboardingRecords ADD CONSTRAINT FK_OnboardingRecords_Employees_EmployeeId
+                FOREIGN KEY (EmployeeId) REFERENCES Employees(Id) ON DELETE CASCADE");
+
+        ctx.Database.ExecuteSqlRaw(@"
+            IF NOT EXISTS (
+                SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_NAME='OnboardingRecords' AND COLUMN_NAME='CandidateName'
+            )
+            ALTER TABLE OnboardingRecords ADD CandidateName NVARCHAR(MAX) NULL");
+
+        ctx.Database.ExecuteSqlRaw(@"
+            IF NOT EXISTS (
+                SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_NAME='OnboardingRecords' AND COLUMN_NAME='CandidateEmail'
+            )
+            ALTER TABLE OnboardingRecords ADD CandidateEmail NVARCHAR(MAX) NULL");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[Schema migration] {ex.Message}");
+    }
+
     DatabaseSeeder.Seed(ctx);
 }
 
