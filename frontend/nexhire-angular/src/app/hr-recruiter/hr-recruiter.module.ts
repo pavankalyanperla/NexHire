@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../shared/shared.module';
 import { TooltipModule } from 'primeng/tooltip';
 import { CheckboxModule } from 'primeng/checkbox';
+import { DrawerModule } from 'primeng/drawer';
 
 import { HRRecruiterComponent } from './dashboard/hr-recruiter.component';
 import { HRDashboardComponent } from './hr-dashboard/hr-dashboard.component';
@@ -29,6 +30,6 @@ const routes: Routes = [{
 @NgModule({
   declarations: [HRRecruiterComponent, HRDashboardComponent, EmployeeManagementComponent,
     AttendanceOverviewComponent, JobPostingsComponent, CandidatesComponent, OnboardingComponent],
-  imports: [SharedModule, TooltipModule, CheckboxModule, RouterModule.forChild(routes)]
+  imports: [SharedModule, TooltipModule, CheckboxModule, DrawerModule, RouterModule.forChild(routes)]
 })
 export class HRRecruiterModule {}

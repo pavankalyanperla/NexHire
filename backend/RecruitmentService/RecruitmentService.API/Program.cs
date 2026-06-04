@@ -74,6 +74,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseStaticFiles();
+
+var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "Uploads");
+if (!Directory.Exists(uploadsPath)) Directory.CreateDirectory(uploadsPath);
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPath),
+    RequestPath = "/Uploads"
+});
+
 app.UseCors("NgCors");
 app.UseAuthentication();
 app.UseAuthorization();

@@ -9,10 +9,12 @@
 
   <p-table [value]="candidates" [loading]="loading" stripedRows>
     <ng-template pTemplate="header">
-      <tr><th>Name</th><th>Email</th><th>Applied</th><th>AI Score</th><th>Status</th><th>Actions</th></tr>
+      <tr>
+        <th>Name</th><th>Email</th><th>Applied</th><th>AI Score</th><th>Status</th><th>Actions</th>
+      </tr>
     </ng-template>
     <ng-template pTemplate="body" let-c>
-      <tr>
+      <tr (click)="openCandidatePanel(c)" style="cursor:pointer">
         <td><strong>{{ c.candidateName }}</strong></td>
         <td>{{ c.candidateEmail }}</td>
         <td>{{ c.appliedAt | date:'dd MMM' }}</td>
@@ -20,16 +22,32 @@
           <p-tag *ngIf="c.aiMatchScore !== null" [value]="c.aiMatchScore + '%'" [severity]="scoreSeverity(c.aiMatchScore)"></p-tag>
           <span *ngIf="c.aiMatchScore === null" class="text-muted">—</span>
         </td>
-        <td>
-          <p-select [ngModel]="c.status" [options]="statuses" (ngModelChange)="updateStatus(c.id, $event)" [style]="{ width: '120px' }"></p-select>
+        <td (click)="$event.stopPropagation()">
+          <p-select
+            [ngModel]="c.status"
+            [options]="statusOptions"
+            optionLabel="label"
+            optionValue="value"
+            (onChange)="updateStatus(c.id, $event.value)"
+            [style]="{'width':'140px','min-width':'140px'}"
+            [panelStyle]="{'z-index':'9999','min-width':'140px'}"
+            appendTo="body"
+            placeholder="Status">
+          </p-select>
         </td>
-        <td class="action-btns">
-          <p-button icon="pi pi-eye" [text]="true" severity="info" (onClick)="screen(c.id)" pTooltip="AI Screen" styleClass="mr-1"></p-button>
-          <p-button icon="pi pi-question-circle" [text]="true" severity="warn" (onClick)="generateQuestions(c.id)" pTooltip="Generate Questions"></p-button>
+        <td class="action-btns" (click)="$event.stopPropagation()">
+          <p-button icon="pi pi-file-pdf" label="Resume" size="small" [text]="true" severity="info"
+            (onClick)="viewResume(c)" pTooltip="View Resume" styleClass="mr-1"></p-button>
+          <p-button icon="pi pi-eye" size="small" [text]="true" severity="info"
+            (onClick)="screen(c.id)" pTooltip="AI Screen" styleClass="mr-1"></p-button>
+          <p-button icon="pi pi-question-circle" size="small" [text]="true" severity="warn"
+            (onClick)="generateQuestions(c.id)" pTooltip="Generate Questions"></p-button>
         </td>
       </tr>
     </ng-template>
-    <ng-template pTemplate="emptymessage"><tr><td colspan="6" class="text-center">No applications yet</td></tr></ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr><td colspan="6" class="text-center">No applications yet</td></tr>
+    </ng-template>
   </p-table>
 </div>
 
@@ -37,11 +55,16 @@
 <p-dialog [(visible)]="showScreenDialog" header="AI Resume Screening" [modal]="true" [style]="{ width: '520px' }">
   <div *ngIf="screenLoading" class="loading-state"><p-progressSpinner></p-progressSpinner></div>
   <div *ngIf="!screenLoading && screenResult" class="screening-result">
-    <div class="score-circle" [class.score-high]="screenResult.matchScore>=80" [class.score-mid]="screenResult.matchScore>=60 && screenResult.matchScore<80" [class.score-low]="screenResult.matchScore<60">
+    <div class="score-circle"
+         [class.score-high]="screenResult.matchScore>=80"
+         [class.score-mid]="screenResult.matchScore>=60 && screenResult.matchScore<80"
+         [class.score-low]="screenResult.matchScore<60">
       <span class="score-number">{{ screenResult.matchScore }}%</span>
       <span class="score-label">Match</span>
     </div>
-    <p-tag [value]="screenResult.recommendation" [severity]="screenResult.matchScore>=80?'success':screenResult.matchScore>=60?'warn':'danger'" styleClass="mb-3 block"></p-tag>
+    <p-tag [value]="screenResult.recommendation"
+           [severity]="screenResult.matchScore>=80?'success':screenResult.matchScore>=60?'warn':'danger'"
+           styleClass="mb-3 block"></p-tag>
     <p class="screening-summary">{{ screenResult.summary }}</p>
     <div class="skills-row">
       <div>
@@ -67,7 +90,9 @@
     <div *ngFor="let q of getQList(questions, 'technical_questions')" class="question-item">
       <span class="q-number">Q{{ q.id }}</span>
       <span class="q-text">{{ q.question }}</span>
-      <p-tag [value]="q.difficulty" [severity]="q.difficulty==='Hard'?'danger':q.difficulty==='Medium'?'warn':'success'" styleClass="ml-2"></p-tag>
+      <p-tag [value]="q.difficulty"
+             [severity]="q.difficulty==='Hard'?'danger':q.difficulty==='Medium'?'warn':'success'"
+             styleClass="ml-2"></p-tag>
     </div>
     <h4 class="mt-4">HR Questions</h4>
     <div *ngFor="let q of getQList(questions, 'hr_questions')" class="question-item">
@@ -84,3 +109,114 @@
     <p-button label="Close" severity="secondary" (onClick)="showQDialog=false"></p-button>
   </ng-template>
 </p-dialog>
+
+<!-- Candidate Pipeline Drawer -->
+<p-drawer [(visible)]="showCandidatePanel" position="right" [style]="{width:'520px'}" header="Candidate Pipeline">
+  <div *ngIf="selectedCandidate" class="candidate-pipeline">
+
+    <!-- Candidate Info -->
+    <div class="pipeline-header">
+      <h3 style="margin:0 0 4px">{{ selectedCandidate.candidateName }}</h3>
+      <p style="margin:0 0 8px;color:#666;font-size:0.875rem">{{ selectedCandidate.candidateEmail }}</p>
+      <p-badge [value]="selectedCandidate.status" severity="info"></p-badge>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Step 1: AI Resume Score -->
+    <div class="pipeline-step">
+      <div class="step-header">
+        <i class="pi pi-star" style="color:#f59e0b"></i>
+        <strong>Step 1 — AI Resume Score</strong>
+        <p-badge *ngIf="selectedCandidate.aiMatchScore !== null"
+                 [value]="selectedCandidate.aiMatchScore + '%'"
+                 [severity]="scoreSeverity(selectedCandidate.aiMatchScore)">
+        </p-badge>
+      </div>
+      <p-button *ngIf="selectedCandidate.aiMatchScore === null"
+                label="Screen Resume" icon="pi pi-search" size="small"
+                (onClick)="screen(selectedCandidate.id); showScreenDialog=false">
+      </p-button>
+      <p-button *ngIf="selectedCandidate.aiMatchScore !== null"
+                label="Re-screen" icon="pi pi-refresh" size="small" severity="secondary"
+                (onClick)="screen(selectedCandidate.id); showScreenDialog=false">
+      </p-button>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Step 2: Interview Questions -->
+    <div class="pipeline-step">
+      <div class="step-header">
+        <i class="pi pi-question-circle" style="color:#6366f1"></i>
+        <strong>Step 2 — Interview Questions</strong>
+        <i *ngIf="selectedCandidate.interviewQuestions" class="pi pi-check-circle" style="color:#22c55e"></i>
+      </div>
+      <p-button
+        [label]="selectedCandidate.interviewQuestions ? 'Regenerate Questions' : 'Generate Questions'"
+        icon="pi pi-list" size="small" severity="secondary" [loading]="qLoading"
+        (onClick)="generateQuestions(selectedCandidate.id)">
+      </p-button>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Step 3: Answer Evaluation -->
+    <div class="pipeline-step" *ngIf="selectedCandidate.interviewQuestions && answerInputs.length > 0">
+      <div class="step-header">
+        <i class="pi pi-check-square" style="color:#0ea5e9"></i>
+        <strong>Step 3 — Evaluate Answers</strong>
+      </div>
+      <div *ngFor="let qa of answerInputs; let i = index" class="qa-input" style="margin-bottom:12px">
+        <label style="display:block;font-size:0.8rem;color:#555;margin-bottom:4px">
+          Q{{ i+1 }}: {{ qa.question }}
+        </label>
+        <textarea pTextarea [(ngModel)]="qa.answer" rows="2"
+                  style="width:100%;resize:vertical"
+                  placeholder="Enter candidate's answer...">
+        </textarea>
+      </div>
+      <div style="margin-top:8px">
+        <p-button label="Evaluate with AI" icon="pi pi-bolt"
+                  size="small" severity="success"
+                  (onClick)="submitAnswersForEvaluation()">
+        </p-button>
+      </div>
+      <!-- Evaluation Result -->
+      <div *ngIf="showEvaluationResult && evaluationResult" class="eval-result" style="margin-top:16px;padding:12px;background:#f0fdf4;border-radius:8px;border:1px solid #86efac">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong>Score: {{ evaluationResult.overall_score }}/100</strong>
+          <p-tag [value]="evaluationResult.recommendation"
+                 [severity]="evaluationResult.overall_score>=70?'success':evaluationResult.overall_score>=50?'warn':'danger'">
+          </p-tag>
+        </div>
+        <p style="font-size:0.85rem;color:#374151;margin:0">{{ evaluationResult.overall_feedback }}</p>
+      </div>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Step 4: Final Decision -->
+    <div class="pipeline-step">
+      <div class="step-header">
+        <i class="pi pi-flag" style="color:#ef4444"></i>
+        <strong>Step 4 — Final Decision</strong>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <p-button label="Shortlist" icon="pi pi-check" size="small" severity="success"
+                  (onClick)="updateStatus(selectedCandidate.id, 'Shortlisted')">
+        </p-button>
+        <p-button label="Hire" icon="pi pi-user-plus" size="small"
+                  (onClick)="updateStatus(selectedCandidate.id, 'Hired')">
+        </p-button>
+        <p-button label="Reject" icon="pi pi-times" size="small" severity="danger"
+                  (onClick)="updateStatus(selectedCandidate.id, 'Rejected')">
+        </p-button>
+        <p-button label="View Resume" icon="pi pi-file-pdf" size="small" severity="info" [outlined]="true"
+                  (onClick)="viewResume(selectedCandidate)">
+        </p-button>
+      </div>
+    </div>
+
+  </div>
+</p-drawer>
