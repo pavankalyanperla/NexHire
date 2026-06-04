@@ -54,11 +54,17 @@ public class OnboardingController : ControllerBase
     [Authorize(Roles = "ManagementAdmin,HRRecruiter")]
     public async Task<IActionResult> Create([FromBody] CreateOnboardingDto dto)
     {
-        // Uniqueness check only for existing employees
+        // Uniqueness check by EmployeeId (for linked employees) or CandidateEmail (for new hires)
         if (dto.EmployeeId.HasValue && dto.EmployeeId.Value > 0)
         {
             var exists = await _ctx.OnboardingRecords.AnyAsync(o => o.EmployeeId == dto.EmployeeId);
             if (exists) return BadRequest(new { message = "Onboarding record already exists for this employee." });
+        }
+        else if (!string.IsNullOrWhiteSpace(dto.CandidateEmail))
+        {
+            var exists = await _ctx.OnboardingRecords.AnyAsync(
+                o => o.CandidateEmail == dto.CandidateEmail);
+            if (exists) return BadRequest(new { message = $"Onboarding record already exists for {dto.CandidateName}." });
         }
 
         var record = new OnboardingRecord

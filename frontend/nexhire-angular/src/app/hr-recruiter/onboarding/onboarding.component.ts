@@ -40,15 +40,16 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    this.load();
-    this.loadHiredCandidates();
+    this.loadRecords();
   }
 
   ngAfterViewInit() {
-    setTimeout(() => { if (!this.dataLoaded) this.load(); }, 100);
+    setTimeout(() => { if (!this.dataLoaded) this.loadRecords(); }, 100);
   }
 
-  load() {
+  load() { this.loadRecords(); }
+
+  loadRecords() {
     this.loading = true;
     this.hrms.getAllOnboarding().subscribe({
       next: r => {
@@ -56,6 +57,7 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
         this.loading = false;
         this.dataLoaded = true;
         this.cdr.detectChanges();
+        this.loadHiredCandidates();
       },
       error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
@@ -69,7 +71,16 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
         forkJoin(requests).subscribe({
           next: results => {
             const all = (results as any[][]).flat();
-            this.hiredCandidates = all.filter((a: any) => a.status === 'Hired');
+            const allHired = all.filter((a: any) => a.status === 'Hired');
+            // Exclude candidates who already have an onboarding record
+            const onboardedEmails = new Set(
+              this.records
+                .map((o: any) => (o.candidateEmail || '').toLowerCase())
+                .filter(Boolean)
+            );
+            this.hiredCandidates = allHired.filter(
+              (a: any) => !onboardedEmails.has((a.candidateEmail || '').toLowerCase())
+            );
             this.cdr.detectChanges();
           },
           error: () => { this.hiredCandidates = []; this.cdr.detectChanges(); }
@@ -105,8 +116,7 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
       next: () => {
         this.showCreateDialog = false;
         this.createLoading = false;
-        this.dataLoaded = false;
-        this.load();
+        this.loadRecords();
       },
       error: e => { alert(e.error?.message || 'Error creating onboarding record'); this.createLoading = false; }
     });

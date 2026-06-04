@@ -20,5 +20,5 @@ public class Employee
     public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
     public ICollection<PayrollRecord> PayrollRecords { get; set; } = new List<PayrollRecord>();
     public ICollection<PerformanceReview> PerformanceReviews { get; set; } = new List<PerformanceReview>();
-    public OnboardingRecord? OnboardingRecord { get; set; }
+    public ICollection<OnboardingRecord> OnboardingRecords { get; set; } = new List<OnboardingRecord>();
 }

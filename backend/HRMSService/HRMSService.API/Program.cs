@@ -69,6 +69,22 @@ using (var scope = app.Services.CreateScope())
     var ctx = scope.ServiceProvider.GetRequiredService<HRMSDbContext>();
     ctx.Database.EnsureCreated();
 
+    // Drop unique index on EmployeeId — allows multiple NULL (new hire) onboarding records
+    try
+    {
+        ctx.Database.ExecuteSqlRaw(@"
+            IF EXISTS (
+                SELECT 1 FROM sys.indexes
+                WHERE name = 'IX_OnboardingRecords_EmployeeId'
+                AND object_id = OBJECT_ID('OnboardingRecords')
+            )
+            DROP INDEX IX_OnboardingRecords_EmployeeId ON OnboardingRecords");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[Index migration] {ex.Message}");
+    }
+
     // Idempotent schema migration: support onboarding records for new hires not yet in Employees table
     try
     {
