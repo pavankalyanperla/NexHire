@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../shared/shared.module';
+import { PasswordModule } from 'primeng/password';
 
 import { EmployeeComponent } from './dashboard/employee.component';
 import { EmployeeDashboardComponent } from './employee-dashboard/employee-dashboard.component';
@@ -10,25 +11,29 @@ import { MyLeavesComponent } from './my-leaves/my-leaves.component';
 import { MyPerformanceComponent } from './my-performance/my-performance.component';
 import { AIChatbotComponent } from './ai-chatbot/ai-chatbot.component';
 import { MyOnboardingComponent } from './my-onboarding/my-onboarding.component';
+import { ChangePasswordComponent } from './change-password/change-password.component';
 
 const routes: Routes = [{
   path: '',
   component: EmployeeComponent,
   children: [
-    { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-    { path: 'dashboard', component: EmployeeDashboardComponent },
-    { path: 'attendance', component: MyAttendanceComponent },
-    { path: 'payslips', component: MyPayslipsComponent },
-    { path: 'leaves', component: MyLeavesComponent },
-    { path: 'performance', component: MyPerformanceComponent },
-    { path: 'onboarding', component: MyOnboardingComponent }
+    { path: '',                redirectTo: 'dashboard', pathMatch: 'full' },
+    { path: 'dashboard',       component: EmployeeDashboardComponent },
+    { path: 'attendance',      component: MyAttendanceComponent },
+    { path: 'payslips',        component: MyPayslipsComponent },
+    { path: 'leaves',          component: MyLeavesComponent },
+    { path: 'performance',     component: MyPerformanceComponent },
+    { path: 'onboarding',      component: MyOnboardingComponent },
+    { path: 'change-password', component: ChangePasswordComponent }
   ]
 }];
 
 @NgModule({
-  declarations: [EmployeeComponent, EmployeeDashboardComponent, MyAttendanceComponent,
-    MyPayslipsComponent, MyLeavesComponent, MyPerformanceComponent, AIChatbotComponent,
-    MyOnboardingComponent],
-  imports: [SharedModule, RouterModule.forChild(routes)]
+  declarations: [
+    EmployeeComponent, EmployeeDashboardComponent, MyAttendanceComponent,
+    MyPayslipsComponent, MyLeavesComponent, MyPerformanceComponent,
+    AIChatbotComponent, MyOnboardingComponent, ChangePasswordComponent
+  ],
+  imports: [SharedModule, PasswordModule, RouterModule.forChild(routes)]
 })
 export class EmployeeModule {}

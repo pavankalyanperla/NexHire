@@ -90,6 +90,39 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    public async Task<CreateEmployeeAccountResponseDto> CreateEmployeeAccountAsync(CreateEmployeeAccountDto dto)
+    {
+        var existing = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+        if (existing != null)
+            throw new Exception($"An account with email {dto.Email} already exists.");
+
+        var tempPassword = $"NexHire@{DateTime.UtcNow.Year}!" + Guid.NewGuid().ToString("N")[..4].ToUpper();
+
+        var user = new User
+        {
+            FullName     = dto.FullName,
+            Email        = dto.Email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(tempPassword),
+            Role         = "Employee",
+            Department   = dto.Department,
+            IsActive     = true,
+            CreatedAt    = DateTime.UtcNow
+        };
+
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        return new CreateEmployeeAccountResponseDto
+        {
+            UserId            = user.Id,
+            FullName          = user.FullName,
+            Email             = user.Email,
+            TemporaryPassword = tempPassword,
+            Role              = "Employee",
+            Message           = "Account created successfully"
+        };
+    }
+
     private static AuthResponseDto BuildResponse(User user, string token) => new()
     {
         Token = token,

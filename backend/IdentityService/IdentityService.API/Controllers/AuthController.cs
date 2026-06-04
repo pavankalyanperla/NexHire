@@ -2,6 +2,7 @@ using IdentityService.Application.DTOs;
 using IdentityService.Application.Interfaces;
 using IdentityService.Domain.Entities;
 using IdentityService.Infrastructure.Data;
+using IdentityService.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly IdentityDbContext _context;
+    private readonly IdentityEmailService _emailService;
 
-    public AuthController(IAuthService authService, IdentityDbContext context)
+    public AuthController(IAuthService authService, IdentityDbContext context, IdentityEmailService emailService)
     {
-        _authService = authService;
-        _context = context;
+        _authService   = authService;
+        _context       = context;
+        _emailService  = emailService;
     }
 
     [HttpPost("register")]
@@ -57,22 +60,52 @@ public class AuthController : ControllerBase
     [HttpGet("me")]
     public IActionResult Me()
     {
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-                  ?? User.FindFirst("sub")?.Value;
-        var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
-                 ?? User.FindFirst("email")?.Value;
-        var fullName = User.FindFirst("fullName")?.Value;
-        var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+        var userId     = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                      ?? User.FindFirst("sub")?.Value;
+        var email      = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+                      ?? User.FindFirst("email")?.Value;
+        var fullName   = User.FindFirst("fullName")?.Value;
+        var role       = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
         var department = User.FindFirst("department")?.Value;
 
-        return Ok(new
+        return Ok(new { userId, email, fullName, role, department });
+    }
+
+    [HttpPost("create-employee-account")]
+    [Authorize(Roles = "ManagementAdmin,HRRecruiter")]
+    public async Task<IActionResult> CreateEmployeeAccount([FromBody] CreateEmployeeAccountDto dto)
+    {
+        try
         {
-            userId,
-            email,
-            fullName,
-            role,
-            department
-        });
+            var result = await _authService.CreateEmployeeAccountAsync(dto);
+            await _emailService.SendWelcomeEmailAsync(result.Email, result.FullName, result.TemporaryPassword);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+    {
+        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                     ?? User.FindFirst("sub")?.Value;
+        if (!int.TryParse(userIdStr, out var userId))
+            return Unauthorized(new { message = "Invalid token." });
+
+        var user = await _context.Users.FindAsync(userId);
+        if (user is null) return NotFound(new { message = "User not found." });
+
+        if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
+            return BadRequest(new { message = "Current password is incorrect." });
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Password changed successfully." });
     }
 
     [HttpPost("seed")]
@@ -94,11 +127,11 @@ public class AuthController : ControllerBase
             {
                 _context.Users.Add(new User
                 {
-                    FullName = s.FullName,
-                    Email = s.Email,
+                    FullName     = s.FullName,
+                    Email        = s.Email,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(s.Password),
-                    Role = s.Role,
-                    Department = s.Department
+                    Role         = s.Role,
+                    Department   = s.Department
                 });
                 created++;
             }

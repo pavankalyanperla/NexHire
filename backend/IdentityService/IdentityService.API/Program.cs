@@ -15,6 +15,7 @@ builder.Services.AddDbContext<IdentityDbContext>(options =>
 
 // Auth service
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IdentityEmailService>();
 
 // JWT Authentication
 var jwtSecret = builder.Configuration["JwtSettings:Secret"]!;

@@ -12,12 +12,13 @@ export class EmployeeComponent implements OnInit {
   user: AuthResponse | null = null;
 
   menuItems = [
-    { label: 'Dashboard',   icon: 'pi pi-home',       link: '/employee/dashboard' },
-    { label: 'Attendance',  icon: 'pi pi-calendar',   link: '/employee/attendance' },
-    { label: 'Payslips',    icon: 'pi pi-wallet',     link: '/employee/payslips' },
-    { label: 'Leaves',      icon: 'pi pi-clock',      link: '/employee/leaves' },
-    { label: 'Performance', icon: 'pi pi-star',       link: '/employee/performance' },
-    { label: 'Onboarding',  icon: 'pi pi-user-plus',  link: '/employee/onboarding' }
+    { label: 'Dashboard',       icon: 'pi pi-home',       link: '/employee/dashboard' },
+    { label: 'Attendance',      icon: 'pi pi-calendar',   link: '/employee/attendance' },
+    { label: 'Payslips',        icon: 'pi pi-wallet',     link: '/employee/payslips' },
+    { label: 'Leaves',          icon: 'pi pi-clock',      link: '/employee/leaves' },
+    { label: 'Performance',     icon: 'pi pi-star',       link: '/employee/performance' },
+    { label: 'Onboarding',      icon: 'pi pi-user-plus',  link: '/employee/onboarding' },
+    { label: 'Change Password', icon: 'pi pi-lock',       link: '/employee/change-password' }
   ];
 
   constructor(private authService: AuthService) {}

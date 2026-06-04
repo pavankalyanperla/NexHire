@@ -67,6 +67,7 @@ public class HRMSDbContext : DbContext
             .HasOne(o => o.Employee)
             .WithOne(e => e.OnboardingRecord)
             .HasForeignKey<OnboardingRecord>(o => o.EmployeeId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

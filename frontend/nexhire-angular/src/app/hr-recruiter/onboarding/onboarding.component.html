@@ -1,3 +1,13 @@
+<div *ngIf="showToastFlag"
+     [style]="{'position':'fixed','top':'20px','right':'20px','z-index':'9999',
+              'padding':'12px 20px','border-radius':'8px','font-weight':'500',
+              'background': toastSeverity === 'success' ? '#dcfce7' : '#fee2e2',
+              'color': toastSeverity === 'success' ? '#166534' : '#991b1b',
+              'border': toastSeverity === 'success' ? '1px solid #86efac' : '1px solid #fca5a5'}">
+  <i [class]="toastSeverity === 'success' ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle'"
+     style="margin-right:6px"></i>{{ toastMsg }}
+</div>
+
 <div class="page-container">
   <div class="page-header">
     <h2>Onboarding Records</h2>
@@ -31,8 +41,23 @@
           </div>
         </td>
         <td><p-tag [value]="r.status" [severity]="statusSeverity(r.status)"></p-tag></td>
-        <td>
-          <p-button icon="pi pi-pencil" [text]="true" severity="info" (onClick)="openEdit(r)" pTooltip="Edit Checklist"></p-button>
+        <td class="action-btns">
+          <p-button icon="pi pi-pencil" [text]="true" severity="info"
+            (onClick)="openEdit(r)" pTooltip="Edit Checklist" styleClass="mr-1">
+          </p-button>
+          <ng-container *ngIf="!accountCreated[r.id]; else accountDone">
+            <p-button icon="pi pi-user-plus" label="Create Account" size="small"
+              severity="success"
+              [loading]="creatingAccount[r.id]"
+              (onClick)="createEmployeeAccount(r)"
+              pTooltip="Create employee login and send credentials by email">
+            </p-button>
+          </ng-container>
+          <ng-template #accountDone>
+            <span style="color:#16a34a;font-size:0.85rem">
+              <i class="pi pi-check-circle"></i> Account Created
+            </span>
+          </ng-template>
         </td>
       </tr>
     </ng-template>

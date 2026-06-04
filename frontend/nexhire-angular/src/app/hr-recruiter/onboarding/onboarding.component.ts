@@ -1,8 +1,10 @@
 import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { forkJoin } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { HrmsService } from '../../core/services/hrms.service';
 import { RecruitmentService } from '../../core/services/recruitment.service';
 import { OnboardingRecordDto } from '../../core/models/hrms.model';
+import { environment } from '../../../environments/environment';
 
 @Component({ selector: 'app-onboarding', templateUrl: './onboarding.component.html', standalone: false })
 export class OnboardingComponent implements OnInit, AfterViewInit {
@@ -16,6 +18,12 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
   selectedHiredCandidate: any = null;
   createLoading = false;
 
+  creatingAccount: { [id: number]: boolean } = {};
+  accountCreated: { [id: number]: boolean } = {};
+  toastMsg = '';
+  toastSeverity: 'success' | 'error' = 'success';
+  showToastFlag = false;
+
   showEditDialog = false;
   editRecord: OnboardingRecordDto | null = null;
   editForm: any = {};
@@ -27,6 +35,7 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
   constructor(
     private hrms: HrmsService,
     private recruitment: RecruitmentService,
+    private http: HttpClient,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -150,5 +159,43 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
 
   statusSeverity(s: string): 'success' | 'warn' {
     return s === 'Completed' ? 'success' : 'warn';
+  }
+
+  createEmployeeAccount(record: any) {
+    if (!record.candidateEmail) {
+      this.showToast('No candidate email found on this record.', 'error');
+      return;
+    }
+
+    this.creatingAccount[record.id] = true;
+
+    const payload = {
+      fullName:    record.candidateName  || record.employeeName,
+      email:       record.candidateEmail,
+      department:  record.department     || 'General',
+      designation: record.designation    || 'Employee'
+    };
+
+    this.http.post<any>(`${environment.apiUrl}/auth/create-employee-account`, payload).subscribe({
+      next: () => {
+        this.accountCreated[record.id]   = true;
+        this.creatingAccount[record.id]  = false;
+        this.showToast(`Account created! Credentials sent to ${record.candidateEmail}`, 'success');
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        this.creatingAccount[record.id] = false;
+        this.showToast(err.error?.message || 'Failed to create account.', 'error');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  showToast(msg: string, severity: 'success' | 'error') {
+    this.toastMsg      = msg;
+    this.toastSeverity = severity;
+    this.showToastFlag = true;
+    setTimeout(() => { this.showToastFlag = false; this.cdr.detectChanges(); }, 4000);
+    this.cdr.detectChanges();
   }
 }
