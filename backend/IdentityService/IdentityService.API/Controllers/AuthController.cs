@@ -78,7 +78,8 @@ public class AuthController : ControllerBase
         try
         {
             var result = await _authService.CreateEmployeeAccountAsync(dto);
-            await _emailService.SendWelcomeEmailAsync(result.Email, result.FullName, result.TemporaryPassword);
+            await _emailService.SendWelcomeEmailAsync(
+                result.PersonalEmail, result.Email, result.FullName, result.TemporaryPassword);
             return Ok(result);
         }
         catch (Exception ex)

@@ -47,6 +47,29 @@ public class EmployeeService : IEmployeeService
         return ToDto(emp);
     }
 
+    public async Task<EmployeeDto> CreateFromHireAsync(CreateFromHireDto dto)
+    {
+        var emp = new Employee
+        {
+            UserId      = dto.UserId,
+            FullName    = dto.FullName,
+            Email       = dto.Email,
+            Phone       = string.Empty,
+            Department  = dto.Department,
+            Designation = dto.Designation,
+            Role        = dto.Role,
+            JoiningDate = dto.JoiningDate == default ? DateTime.UtcNow : dto.JoiningDate,
+            BaseSalary  = 50000,
+            Status      = "Active",
+            CreatedAt   = DateTime.UtcNow
+        };
+        _ctx.Employees.Add(emp);
+        await _ctx.SaveChangesAsync();
+        emp.EmployeeCode = $"NX-{emp.Id:000}";
+        await _ctx.SaveChangesAsync();
+        return ToDto(emp);
+    }
+
     public async Task<EmployeeDto> UpdateEmployeeAsync(int id, UpdateEmployeeDto dto)
     {
         var emp = await _ctx.Employees.FindAsync(id)

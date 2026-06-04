@@ -23,7 +23,6 @@ const routes: Routes = [{
     { path: 'payslips',        component: MyPayslipsComponent },
     { path: 'leaves',          component: MyLeavesComponent },
     { path: 'performance',     component: MyPerformanceComponent },
-    { path: 'onboarding',      component: MyOnboardingComponent },
     { path: 'change-password', component: ChangePasswordComponent }
   ]
 }];

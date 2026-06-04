@@ -21,7 +21,7 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
   creatingAccount: { [id: number]: boolean } = {};
   accountCreated: { [id: number]: boolean } = {};
   toastMsg = '';
-  toastSeverity: 'success' | 'error' = 'success';
+  toastSeverity: 'success' | 'warn' | 'error' = 'success';
   showToastFlag = false;
 
   showEditDialog = false;
@@ -162,26 +162,55 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
   }
 
   createEmployeeAccount(record: any) {
-    if (!record.candidateEmail) {
-      this.showToast('No candidate email found on this record.', 'error');
+    if (!record.candidateEmail && !record.employeeName) {
+      this.showToast('No candidate information found on this record.', 'error');
       return;
     }
 
     this.creatingAccount[record.id] = true;
 
-    const payload = {
-      fullName:    record.candidateName  || record.employeeName,
-      email:       record.candidateEmail,
-      department:  record.department     || 'General',
-      designation: record.designation    || 'Employee'
+    const accountPayload = {
+      fullName:      record.candidateName  || record.employeeName,
+      personalEmail: record.candidateEmail || '',
+      department:    record.department     || 'General',
+      designation:   record.designation   || 'Employee'
     };
 
-    this.http.post<any>(`${environment.apiUrl}/auth/create-employee-account`, payload).subscribe({
-      next: () => {
-        this.accountCreated[record.id]   = true;
-        this.creatingAccount[record.id]  = false;
-        this.showToast(`Account created! Credentials sent to ${record.candidateEmail}`, 'success');
-        this.cdr.detectChanges();
+    // Step 1 — create login account in IdentityService
+    this.http.post<any>(`${environment.apiUrl}/auth/create-employee-account`, accountPayload).subscribe({
+      next: (accountResponse: any) => {
+
+        // Step 2 — create employee record in HRMSService
+        const employeePayload = {
+          userId:      accountResponse.userId,
+          fullName:    accountResponse.fullName,
+          email:       accountResponse.email,
+          department:  accountPayload.department,
+          designation: accountPayload.designation,
+          role:        'Employee',
+          joiningDate: record.joiningDate || new Date().toISOString()
+        };
+
+        this.http.post<any>(`${environment.apiUrl}/employees/create-from-hire`, employeePayload).subscribe({
+          next: () => {
+            this.accountCreated[record.id]  = true;
+            this.creatingAccount[record.id] = false;
+            this.showToast(
+              `Account created! Login: ${accountResponse.email} — Credentials sent to ${accountPayload.personalEmail || 'employee'}`,
+              'success'
+            );
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.accountCreated[record.id]  = true;
+            this.creatingAccount[record.id] = false;
+            this.showToast(
+              `Account created (${accountResponse.email}) — employee profile setup pending. Ask admin to check HRMSService.`,
+              'warn'
+            );
+            this.cdr.detectChanges();
+          }
+        });
       },
       error: err => {
         this.creatingAccount[record.id] = false;
@@ -191,7 +220,7 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
     });
   }
 
-  showToast(msg: string, severity: 'success' | 'error') {
+  showToast(msg: string, severity: 'success' | 'warn' | 'error') {
     this.toastMsg      = msg;
     this.toastSeverity = severity;
     this.showToastFlag = true;

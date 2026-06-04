@@ -43,6 +43,21 @@ public class EmployeesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = emp.Id }, emp);
     }
 
+    [HttpPost("create-from-hire")]
+    [Authorize(Roles = "ManagementAdmin,HRRecruiter")]
+    public async Task<IActionResult> CreateFromHire([FromBody] CreateFromHireDto dto)
+    {
+        try
+        {
+            var employee = await _svc.CreateFromHireAsync(dto);
+            return Ok(employee);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpPut("{id:int}")]
     [Authorize(Roles = "ManagementAdmin,HRRecruiter")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateEmployeeDto dto)

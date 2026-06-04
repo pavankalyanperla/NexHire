@@ -92,16 +92,14 @@ public class AuthService : IAuthService
 
     public async Task<CreateEmployeeAccountResponseDto> CreateEmployeeAccountAsync(CreateEmployeeAccountDto dto)
     {
-        var existing = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-        if (existing != null)
-            throw new Exception($"An account with email {dto.Email} already exists.");
+        var companyEmail = await GetUniqueCompanyEmail(dto.FullName);
 
         var tempPassword = $"NexHire@{DateTime.UtcNow.Year}!" + Guid.NewGuid().ToString("N")[..4].ToUpper();
 
         var user = new User
         {
             FullName     = dto.FullName,
-            Email        = dto.Email,
+            Email        = companyEmail,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(tempPassword),
             Role         = "Employee",
             Department   = dto.Department,
@@ -116,11 +114,36 @@ public class AuthService : IAuthService
         {
             UserId            = user.Id,
             FullName          = user.FullName,
-            Email             = user.Email,
+            Email             = companyEmail,
+            PersonalEmail     = dto.PersonalEmail,
             TemporaryPassword = tempPassword,
             Role              = "Employee",
             Message           = "Account created successfully"
         };
+    }
+
+    private string GenerateCompanyEmail(string fullName)
+    {
+        var parts = fullName.ToLower()
+            .Replace("'", "")
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var prefix = parts.Length >= 2 ? $"{parts[0]}.{parts[1]}" : parts[0];
+        prefix = System.Text.RegularExpressions.Regex.Replace(prefix, @"[^a-z0-9.]", "");
+        return $"{prefix}@nexhire.com";
+    }
+
+    private async Task<string> GetUniqueCompanyEmail(string fullName)
+    {
+        var baseEmail = GenerateCompanyEmail(fullName);
+        var email = baseEmail;
+        int counter = 1;
+        while (await _context.Users.AnyAsync(u => u.Email == email))
+        {
+            var atIdx = baseEmail.IndexOf('@');
+            email = baseEmail[..atIdx] + counter + "@nexhire.com";
+            counter++;
+        }
+        return email;
     }
 
     private static AuthResponseDto BuildResponse(User user, string token) => new()
