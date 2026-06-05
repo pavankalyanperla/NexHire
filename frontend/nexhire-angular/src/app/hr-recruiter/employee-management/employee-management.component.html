@@ -1,3 +1,13 @@
+<div *ngIf="showToastFlag"
+     [style]="{'position':'fixed','top':'20px','right':'20px','z-index':'9999','max-width':'380px',
+              'padding':'12px 20px','border-radius':'8px','font-weight':'500','box-shadow':'0 4px 12px rgba(0,0,0,.12)',
+              'background': toastSeverity === 'success' ? '#dcfce7' : '#fee2e2',
+              'color':      toastSeverity === 'success' ? '#166534' : '#991b1b',
+              'border':     toastSeverity === 'success' ? '1px solid #86efac' : '1px solid #fca5a5'}">
+  <i [class]="toastSeverity === 'success' ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle'"
+     style="margin-right:6px"></i>{{ toastMsg }}
+</div>
+
 <div class="page-container">
   <div class="page-header">
     <h2>Employee Management</h2>
@@ -7,16 +17,36 @@
     <input pInputText placeholder="Search employees..." [(ngModel)]="search" (input)="applyFilter()" class="w-full" />
   </div>
   <p-table [value]="filtered" [loading]="loading" stripedRows>
-    <ng-template pTemplate="header"><tr><th>Code</th><th>Name</th><th>Department</th><th>Designation</th><th>Status</th><th>Actions</th></tr></ng-template>
-    <ng-template pTemplate="body" let-e>
+    <ng-template pTemplate="header">
       <tr>
-        <td>{{ e.employeeCode }}</td><td>{{ e.fullName }}</td><td>{{ e.department }}</td><td>{{ e.designation }}</td>
-        <td><p-tag [value]="e.status" [severity]="e.status==='Active'?'success':'danger'"></p-tag></td>
-        <td><p-button icon="pi pi-pencil" [text]="true" severity="info" (onClick)="openEdit(e)"></p-button></td>
+        <th>Code</th><th>Name</th><th>Department</th><th>Designation</th><th>Status</th><th>Actions</th>
       </tr>
     </ng-template>
+    <ng-template pTemplate="body" let-e>
+      <tr>
+        <td>{{ e.employeeCode }}</td>
+        <td>{{ e.fullName }}</td>
+        <td>{{ e.department }}</td>
+        <td>{{ e.designation }}</td>
+        <td><p-tag [value]="e.status" [severity]="e.status === 'Active' ? 'success' : 'danger'"></p-tag></td>
+        <td style="white-space:nowrap">
+          <p-button icon="pi pi-pencil" [text]="true" severity="info" (onClick)="openEdit(e)" styleClass="mr-1"
+                    pTooltip="Edit"></p-button>
+          <p-button
+            [label]="e.status === 'Active' ? 'Deactivate' : 'Activate'"
+            [severity]="e.status === 'Active' ? 'warn' : 'success'"
+            size="small"
+            (onClick)="toggleStatus(e)">
+          </p-button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr><td colspan="6" class="text-center">No employees found</td></tr>
+    </ng-template>
   </p-table>
-  <p-dialog [(visible)]="showDialog" [header]="editMode?'Edit Employee':'Add Employee'" [modal]="true" [style]="{ width: '440px' }">
+
+  <p-dialog [(visible)]="showDialog" [header]="editMode ? 'Edit Employee' : 'Add Employee'" [modal]="true" [style]="{ width: '440px' }">
     <div class="form-grid">
       <div class="field" *ngIf="!editMode"><label>Full Name</label><input pInputText [(ngModel)]="form.fullName" class="w-full" /></div>
       <div class="field" *ngIf="!editMode"><label>Email</label><input pInputText [(ngModel)]="form.email" class="w-full" /></div>

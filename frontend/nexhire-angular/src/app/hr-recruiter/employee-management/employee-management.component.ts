@@ -14,6 +14,10 @@ export class EmployeeManagementComponent implements OnInit, AfterViewInit {
   dataLoaded = false;
   form: CreateEmployeeDto = this.emptyForm();
 
+  toastMsg = '';
+  toastSeverity: 'success' | 'error' = 'success';
+  showToastFlag = false;
+
   constructor(private hrms: HrmsService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() { this.load(); }
@@ -64,6 +68,29 @@ export class EmployeeManagementComponent implements OnInit, AfterViewInit {
         this.load();
       });
     }
+  }
+
+  toggleStatus(emp: EmployeeDto) {
+    const newStatus = emp.status === 'Active' ? 'Inactive' : 'Active';
+    this.hrms.updateEmployee(emp.id, {
+      phone: emp.phone, department: emp.department,
+      designation: emp.designation, status: newStatus, baseSalary: emp.baseSalary
+    }).subscribe({
+      next: updated => {
+        emp.status = updated.status;
+        this.showToast(`${emp.fullName} marked as ${newStatus}`, 'success');
+        this.cdr.detectChanges();
+      },
+      error: () => this.showToast('Failed to update status', 'error')
+    });
+  }
+
+  showToast(msg: string, severity: 'success' | 'error') {
+    this.toastMsg      = msg;
+    this.toastSeverity = severity;
+    this.showToastFlag = true;
+    setTimeout(() => { this.showToastFlag = false; this.cdr.detectChanges(); }, 3500);
+    this.cdr.detectChanges();
   }
 
   private emptyForm(): CreateEmployeeDto {
