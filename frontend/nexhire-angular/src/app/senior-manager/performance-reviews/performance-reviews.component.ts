@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { HrmsService } from '../../core/services/hrms.service';
+import { AuthService } from '../../core/services/auth.service';
 import { PerformanceReviewDto, UpdateManagerReviewDto } from '../../core/models/hrms.model';
 
 @Component({ selector: 'app-performance-reviews', templateUrl: './performance-reviews.component.html', standalone: false })
@@ -12,7 +13,7 @@ export class PerformanceReviewsComponent implements OnInit, AfterViewInit {
   managerComments = '';
   dataLoaded = false;
 
-  constructor(private hrms: HrmsService, private cdr: ChangeDetectorRef) {}
+  constructor(private hrms: HrmsService, private auth: AuthService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() { this.load(); }
 
@@ -22,9 +23,10 @@ export class PerformanceReviewsComponent implements OnInit, AfterViewInit {
 
   load() {
     this.loading = true;
+    const dept = this.auth.getCurrentUser()?.department;
     this.hrms.getPendingReviews().subscribe({
       next: r => {
-        this.reviews = r;
+        this.reviews = dept ? r.filter((x: any) => x.department === dept) : r;
         this.loading = false;
         this.dataLoaded = true;
         this.cdr.detectChanges();

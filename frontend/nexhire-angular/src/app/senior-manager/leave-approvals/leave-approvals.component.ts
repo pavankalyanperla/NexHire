@@ -20,9 +20,10 @@ export class LeaveApprovalsComponent implements OnInit, AfterViewInit {
 
   load() {
     this.loading = true;
+    const dept = this.auth.getCurrentUser()?.department;
     this.hrms.getPendingLeaves().subscribe({
       next: l => {
-        this.leaves = l;
+        this.leaves = dept ? l.filter((x: any) => x.department === dept) : l;
         this.loading = false;
         this.dataLoaded = true;
         this.cdr.detectChanges();
