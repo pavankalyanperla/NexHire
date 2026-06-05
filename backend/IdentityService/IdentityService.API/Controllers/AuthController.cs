@@ -109,6 +109,55 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Password changed successfully." });
     }
 
+    [HttpGet("users")]
+    [Authorize(Roles = "ManagementAdmin")]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        var users = await _context.Users
+            .Select(u => new
+            {
+                u.Id, u.FullName, u.Email, u.Role,
+                u.Department, u.IsActive, u.CreatedAt
+            })
+            .OrderByDescending(u => u.CreatedAt)
+            .ToListAsync();
+        return Ok(users);
+    }
+
+    [HttpPut("users/{id}/role")]
+    [Authorize(Roles = "ManagementAdmin")]
+    public async Task<IActionResult> UpdateUserRole(int id, [FromBody] UpdateUserRoleDto dto)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user is null) return NotFound(new { message = "User not found." });
+
+        var validRoles = new[] { "Employee", "SeniorManager", "HRRecruiter", "ManagementAdmin" };
+        if (!validRoles.Contains(dto.Role))
+            return BadRequest(new { message = "Invalid role." });
+
+        user.Role       = dto.Role;
+        user.Department = dto.Department ?? user.Department;
+        await _context.SaveChangesAsync();
+        return Ok(new { message = "Role updated successfully.", user.Email, user.Role });
+    }
+
+    [HttpPut("users/{id}/toggle-status")]
+    [Authorize(Roles = "ManagementAdmin")]
+    public async Task<IActionResult> ToggleUserStatus(int id)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user is null) return NotFound(new { message = "User not found." });
+
+        user.IsActive = !user.IsActive;
+        await _context.SaveChangesAsync();
+        return Ok(new
+        {
+            message  = $"User {(user.IsActive ? "activated" : "deactivated")}.",
+            user.Email,
+            user.IsActive
+        });
+    }
+
     [HttpPost("seed")]
     public async Task<IActionResult> Seed()
     {

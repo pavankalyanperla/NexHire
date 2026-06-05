@@ -8,23 +8,26 @@ import { EmployeeListComponent } from './employee-list/employee-list.component';
 import { PayrollManagementComponent } from './payroll-management/payroll-management.component';
 import { RecruitmentOverviewComponent } from './recruitment-overview/recruitment-overview.component';
 import { ReportsComponent } from './reports/reports.component';
+import { UserManagementComponent } from './user-management/user-management.component';
 
 const routes: Routes = [{
   path: '',
   component: ManagementAdminComponent,
   children: [
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-    { path: 'dashboard', component: AdminDashboardComponent },
-    { path: 'employees', component: EmployeeListComponent },
-    { path: 'payroll', component: PayrollManagementComponent },
-    { path: 'recruitment', component: RecruitmentOverviewComponent },
-    { path: 'reports', component: ReportsComponent }
+    { path: 'dashboard',    component: AdminDashboardComponent },
+    { path: 'employees',    component: EmployeeListComponent },
+    { path: 'payroll',      component: PayrollManagementComponent },
+    { path: 'recruitment',  component: RecruitmentOverviewComponent },
+    { path: 'reports',      component: ReportsComponent },
+    { path: 'users',        component: UserManagementComponent }
   ]
 }];
 
 @NgModule({
   declarations: [ManagementAdminComponent, AdminDashboardComponent, EmployeeListComponent,
-    PayrollManagementComponent, RecruitmentOverviewComponent, ReportsComponent],
+    PayrollManagementComponent, RecruitmentOverviewComponent, ReportsComponent,
+    UserManagementComponent],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })
 export class ManagementAdminModule {}

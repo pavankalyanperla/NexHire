@@ -1,0 +1,65 @@
+<div *ngIf="showToastFlag"
+     [style]="{'position':'fixed','top':'20px','right':'20px','z-index':'9999','max-width':'400px',
+              'padding':'12px 20px','border-radius':'8px','font-weight':'500','box-shadow':'0 4px 12px rgba(0,0,0,.12)',
+              'background': toastSeverity === 'success' ? '#dcfce7' : '#fee2e2',
+              'color':      toastSeverity === 'success' ? '#166534' : '#991b1b',
+              'border':     toastSeverity === 'success' ? '1px solid #86efac' : '1px solid #fca5a5'}">
+  <i [class]="toastSeverity === 'success' ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle'"
+     style="margin-right:6px"></i>{{ toastMsg }}
+</div>
+
+<div class="page-container">
+  <div class="page-header">
+    <h2>User Management</h2>
+    <span style="color:#6b7280;font-size:0.9rem">Manage roles and access for all NexHire users</span>
+  </div>
+
+  <p-table [value]="users" [loading]="loading" stripedRows [paginator]="true" [rows]="10">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Current Role</th>
+        <th>Department</th>
+        <th>Status</th>
+        <th>Change Role</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-u>
+      <tr>
+        <td><strong>{{ u.fullName }}</strong></td>
+        <td style="color:#6b7280">{{ u.email }}</td>
+        <td>
+          <p-tag [value]="u.role" [severity]="roleSeverity(u.role)"></p-tag>
+        </td>
+        <td>{{ u.department }}</td>
+        <td>
+          <p-tag [value]="u.isActive ? 'Active' : 'Inactive'"
+                 [severity]="u.isActive ? 'success' : 'danger'"></p-tag>
+        </td>
+        <td>
+          <p-select [options]="roleOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    [ngModel]="u.role"
+                    (onChange)="updateRole(u, $event.value)"
+                    appendTo="body"
+                    [style]="{'width':'170px'}">
+          </p-select>
+        </td>
+        <td>
+          <p-button
+            [label]="u.isActive ? 'Deactivate' : 'Activate'"
+            [severity]="u.isActive ? 'warn' : 'success'"
+            size="small"
+            (onClick)="toggleStatus(u)">
+          </p-button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr><td colspan="7" class="text-center empty-state">No users found</td></tr>
+    </ng-template>
+  </p-table>
+</div>
