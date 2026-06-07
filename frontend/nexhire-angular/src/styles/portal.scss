@@ -1,7 +1,8 @@
 .portal-layout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: #f8fafc;
 }
 
@@ -63,6 +64,8 @@
 .portal-body {
   display: flex;
   flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .portal-sidebar {
@@ -71,6 +74,7 @@
   border-right: 1px solid #e2e8f0;
   padding: 1.5rem 0;
   flex-shrink: 0;
+  overflow-y: auto;
 }
 
 .sidebar-menu {
@@ -109,7 +113,8 @@
 .portal-main {
   flex: 1;
   padding: 2rem;
-  overflow: auto;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .welcome-card {

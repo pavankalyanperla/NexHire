@@ -5,8 +5,9 @@
 
 * { box-sizing: border-box; }
 
+html, body { height: 100%; margin: 0; padding: 0; }
+
 body {
-  margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 14px;
   color: #1f2937;
@@ -21,3 +22,9 @@ body {
 .mt-4 { margin-top: 1rem; }
 .mb-3 { margin-bottom: 0.75rem; }
 .p-error { color: #dc2626; font-size: 0.8125rem; }
+
+.active-link {
+  background: var(--primary-color, #6366f1) !important;
+  color: white !important;
+  border-radius: 6px;
+}

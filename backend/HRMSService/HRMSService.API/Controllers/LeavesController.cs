@@ -27,7 +27,7 @@ public class LeavesController : ControllerBase
         Ok(await _svc.GetPendingLeavesAsync());
 
     [HttpPut("{id:int}/status")]
-    [Authorize(Roles = "ManagementAdmin,SeniorManager")]
+    [Authorize(Roles = "ManagementAdmin,SeniorManager,HRRecruiter")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateLeaveStatusDto dto)
     {
         try { return Ok(await _svc.UpdateLeaveStatusAsync(id, dto)); }
