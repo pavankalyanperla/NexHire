@@ -19,18 +19,30 @@ export class ManagerDashboardComponent implements OnInit, AfterViewInit {
   }
 
   load() {
-    const userId = this.auth.getCurrentUser()?.userId;
-    if (!userId) { this.loading = false; return; }
+    const user = this.auth.getCurrentUser();
+    if (!user?.userId) { this.loading = false; return; }
+
+    const myDept = (user.department || '').toLowerCase();
+    console.log('Manager department:', user.department);
 
     this.loading = true;
     Promise.all([
-      this.hrms.getManagerOverview(userId).toPromise(),
+      this.hrms.getManagerOverview(user.userId).toPromise(),
       this.hrms.getTodayAttendance().toPromise()
     ]).then(([ov, att]) => {
-      this.overview        = ov ?? null;
-      this.todayAttendance = att ?? [];
-      this.loading         = false;
-      this.dataLoaded      = true;
+      this.overview = ov ?? null;
+
+      const all: AttendanceDto[] = att ?? [];
+      console.log('All attendance records:', all.length, '— sample:', all[0]);
+
+      this.todayAttendance = myDept
+        ? all.filter((a: AttendanceDto) => (a.department || '').toLowerCase() === myDept)
+        : all;
+
+      console.log('Filtered attendance for dept:', this.todayAttendance.length);
+
+      this.loading    = false;
+      this.dataLoaded = true;
       this.cdr.detectChanges();
     }).catch(() => { this.loading = false; this.cdr.detectChanges(); });
   }
