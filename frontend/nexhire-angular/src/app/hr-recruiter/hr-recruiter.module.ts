@@ -12,6 +12,7 @@ import { AttendanceOverviewComponent } from './attendance-overview/attendance-ov
 import { JobPostingsComponent } from './job-postings/job-postings.component';
 import { CandidatesComponent } from './candidates/candidates.component';
 import { OnboardingComponent } from './onboarding/onboarding.component';
+import { HRLeaveApprovalsComponent } from './leave-approvals/leave-approvals.component';
 
 const routes: Routes = [{
   path: '',
@@ -23,13 +24,15 @@ const routes: Routes = [{
     { path: 'attendance', component: AttendanceOverviewComponent },
     { path: 'jobs', component: JobPostingsComponent },
     { path: 'jobs/:jobId/candidates', component: CandidatesComponent },
-    { path: 'onboarding', component: OnboardingComponent }
+    { path: 'onboarding', component: OnboardingComponent },
+    { path: 'leave-approvals', component: HRLeaveApprovalsComponent }
   ]
 }];
 
 @NgModule({
   declarations: [HRRecruiterComponent, HRDashboardComponent, EmployeeManagementComponent,
-    AttendanceOverviewComponent, JobPostingsComponent, CandidatesComponent, OnboardingComponent],
+    AttendanceOverviewComponent, JobPostingsComponent, CandidatesComponent, OnboardingComponent,
+    HRLeaveApprovalsComponent],
   imports: [SharedModule, TooltipModule, CheckboxModule, DrawerModule, RouterModule.forChild(routes)]
 })
 export class HRRecruiterModule {}

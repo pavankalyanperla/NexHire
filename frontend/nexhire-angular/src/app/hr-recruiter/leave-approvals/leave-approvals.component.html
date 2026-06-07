@@ -1,0 +1,23 @@
+<div class="page-container">
+  <h2>Leave Approvals</h2>
+  <p-table [value]="leaves" [loading]="loading">
+    <ng-template pTemplate="header">
+      <tr><th>Employee</th><th>Department</th><th>Type</th><th>From</th><th>To</th><th>Reason</th><th>Actions</th></tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-l>
+      <tr>
+        <td><strong>{{ l.employeeName }}</strong></td>
+        <td>{{ l.department }}</td>
+        <td><p-tag [value]="l.leaveType" severity="info"></p-tag></td>
+        <td>{{ l.fromDate | date:'dd MMM yyyy' }}</td>
+        <td>{{ l.toDate | date:'dd MMM yyyy' }}</td>
+        <td>{{ l.reason }}</td>
+        <td>
+          <p-button label="Approve" severity="success" size="small" [loading]="processing===l.id" (onClick)="approve(l.id)" styleClass="mr-1"></p-button>
+          <p-button label="Reject"  severity="danger"  size="small" [loading]="processing===l.id" (onClick)="reject(l.id)"></p-button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage"><tr><td colspan="7" class="text-center">No pending leave requests</td></tr></ng-template>
+  </p-table>
+</div>
