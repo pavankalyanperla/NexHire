@@ -110,12 +110,18 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("create-staff-account")]
-    [Authorize(Roles = "ManagementAdmin")]
+    [Authorize(Roles = "ManagementAdmin,HRRecruiter")]
     public async Task<IActionResult> CreateStaffAccount([FromBody] CreateStaffAccountDto dto)
     {
         try
         {
+            var callerRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            if (callerRole == "HRRecruiter" && dto.Role != "Employee")
+                return Forbid();
+
             var result = await _authService.CreateStaffAccountAsync(dto);
+            await _emailService.SendWelcomeEmailAsync(
+                dto.PersonalEmail, result.Email, result.FullName, result.TemporaryPassword);
             return Ok(result);
         }
         catch (Exception ex)

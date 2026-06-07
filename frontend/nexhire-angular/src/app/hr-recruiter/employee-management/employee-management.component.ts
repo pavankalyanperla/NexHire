@@ -93,31 +93,40 @@ export class EmployeeManagementComponent implements OnInit, AfterViewInit {
   }
 
   createEmployeeAccount(employee: any) {
-    this.creatingAccount[employee.id] = true;
+    setTimeout(() => {
+      this.creatingAccount[employee.id] = true;
+      this.cdr.detectChanges();
+    });
+
     const payload = {
       fullName:      employee.fullName,
       personalEmail: employee.email,
       department:    employee.department,
       designation:   employee.designation,
-      role:          employee.role || 'Employee'
+      role:          'Employee'
     };
+
     this.http.post(`${environment.apiUrl}/auth/create-staff-account`, payload).subscribe({
       next: (res: any) => {
-        this.creatingAccount[employee.id] = false;
-        this.accountCreated[employee.id]  = true;
-        this.createdCredentials = {
-          name:     res.fullName,
-          email:    res.email,
-          password: res.temporaryPassword,
-          role:     res.role
-        };
-        this.showCredentialsDialog = true;
-        this.cdr.detectChanges();
+        setTimeout(() => {
+          this.creatingAccount[employee.id] = false;
+          this.accountCreated[employee.id]  = true;
+          this.createdCredentials = {
+            name:     res.fullName,
+            email:    res.email,
+            password: res.temporaryPassword,
+            role:     res.role
+          };
+          this.showCredentialsDialog = true;
+          this.cdr.detectChanges();
+        });
       },
       error: (err: any) => {
-        this.creatingAccount[employee.id] = false;
-        this.showToast(err.error?.message || 'Failed to create account', 'error');
-        this.cdr.detectChanges();
+        setTimeout(() => {
+          this.creatingAccount[employee.id] = false;
+          this.showToast(err.error?.message || 'Failed to create account', 'error');
+          this.cdr.detectChanges();
+        });
       }
     });
   }
