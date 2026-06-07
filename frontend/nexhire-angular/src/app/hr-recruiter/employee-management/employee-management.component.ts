@@ -134,6 +134,20 @@ export class EmployeeManagementComponent implements OnInit, AfterViewInit {
             role:     res.role
           };
           this.showCredentialsDialog = true;
+
+          // Update HRMS record with company email
+          const companyEmail = res.email;
+          if (companyEmail) {
+            this.hrms.updateEmployee(employee.id, {
+              phone: employee.phone, department: employee.department,
+              designation: employee.designation, status: employee.status || 'Active',
+              baseSalary: employee.baseSalary, email: companyEmail
+            }).subscribe({
+              next: () => { employee.email = companyEmail; this.cdr.detectChanges(); },
+              error: () => {}
+            });
+          }
+
           this.cdr.detectChanges();
         });
       },

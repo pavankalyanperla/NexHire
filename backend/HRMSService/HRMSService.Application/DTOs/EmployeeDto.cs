@@ -37,6 +37,7 @@ public class UpdateEmployeeDto
     public string Designation { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public decimal BaseSalary { get; set; }
+    public string? Email { get; set; }
 }
 
 public class DepartmentSummaryDto

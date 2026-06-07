@@ -101,6 +101,7 @@ public class EmployeeService : IEmployeeService
         emp.Designation = dto.Designation;
         emp.Status      = dto.Status;
         emp.BaseSalary  = dto.BaseSalary;
+        if (dto.Email != null) emp.Email = dto.Email;
         await _ctx.SaveChangesAsync();
         return ToDto(emp);
     }

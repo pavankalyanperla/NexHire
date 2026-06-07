@@ -9,6 +9,7 @@ export interface CreateEmployeeDto {
 }
 export interface UpdateEmployeeDto {
   phone: string; department: string; designation: string; status: string; baseSalary: number;
+  email?: string;
 }
 export interface DepartmentSummary { department: string; count: number; }
 
