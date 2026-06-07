@@ -23,12 +23,28 @@ public class EmployeeService : IEmployeeService
     public async Task<EmployeeDto?> GetEmployeeByUserIdAsync(int userId)
     {
         if (userId <= 0) return null;
-        // OrderByDescending so create-from-hire records (higher Id) take precedence over
-        // any seeded demo employee that may share the same UserId due to legacy data
+
         var e = await _ctx.Employees
             .Where(x => x.UserId == userId)
             .OrderByDescending(x => x.Id)
             .FirstOrDefaultAsync();
+
+        if (e is null)
+        {
+            // Fallback: when a user has multiple Identity accounts (e.g. demo + staff account),
+            // look up their full name from IdentityDB and find the employee by name.
+            var names = await _ctx.Database
+                .SqlQueryRaw<string>(
+                    "SELECT FullName FROM NexHire_IdentityDB.dbo.Users WHERE Id = {0}", userId)
+                .ToListAsync();
+            var fullName = names.FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(fullName))
+                e = await _ctx.Employees
+                    .Where(x => x.FullName == fullName)
+                    .OrderByDescending(x => x.Id)
+                    .FirstOrDefaultAsync();
+        }
+
         return e is null ? null : ToDto(e);
     }
 
