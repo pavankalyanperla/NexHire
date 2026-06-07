@@ -38,7 +38,7 @@
             size="small"
             (onClick)="toggleStatus(e)">
           </p-button>
-          <ng-container *ngIf="!accountCreated[e.id]">
+          <ng-container *ngIf="!hasAccount(e.fullName)">
             <p-button
               icon="pi pi-key"
               label="Create Login"
@@ -49,8 +49,8 @@
               pTooltip="Create login credentials and send welcome email">
             </p-button>
           </ng-container>
-          <span *ngIf="accountCreated[e.id]" style="color:#16a34a;font-size:12px;white-space:nowrap">
-            <i class="pi pi-check"></i> Account Created
+          <span *ngIf="hasAccount(e.fullName)" style="color:#16a34a;font-size:12px;white-space:nowrap">
+            <i class="pi pi-check-circle"></i> Account Active
           </span>
         </td>
       </tr>

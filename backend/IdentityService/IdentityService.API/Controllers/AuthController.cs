@@ -179,6 +179,17 @@ public class AuthController : ControllerBase
         });
     }
 
+    [HttpPost("check-accounts")]
+    [Authorize(Roles = "ManagementAdmin,HRRecruiter")]
+    public async Task<IActionResult> CheckMultipleAccounts([FromBody] List<string> fullNames)
+    {
+        var existing = await _context.Users
+            .Where(u => fullNames.Contains(u.FullName))
+            .Select(u => new { u.FullName, u.Email, u.Role })
+            .ToListAsync();
+        return Ok(existing);
+    }
+
     [HttpPost("seed")]
     public async Task<IActionResult> Seed()
     {

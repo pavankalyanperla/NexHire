@@ -18,8 +18,9 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
   selectedHiredCandidate: any = null;
   createLoading = false;
 
-  creatingAccount: { [id: number]: boolean } = {};
-  accountCreated: { [id: number]: boolean } = {};
+  creatingAccount:          { [id: number]: boolean } = {};
+  accountCreated:           { [id: number]: boolean } = {};
+  candidatesWithAccounts:   Set<string>               = new Set();
   toastMsg = '';
   toastSeverity: 'success' | 'warn' | 'error' = 'success';
   showToastFlag = false;
@@ -57,10 +58,27 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
         this.loading = false;
         this.dataLoaded = true;
         this.cdr.detectChanges();
+        this.checkExistingAccountsForOnboarding(r);
         this.loadHiredCandidates();
       },
       error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
+  }
+
+  checkExistingAccountsForOnboarding(records: any[]) {
+    const names = records.map((r: any) => r.candidateName).filter(Boolean);
+    if (names.length === 0) return;
+    this.http.post<any[]>(`${environment.apiUrl}/auth/check-accounts`, names).subscribe({
+      next: users => {
+        users.forEach(u => this.candidatesWithAccounts.add(u.fullName));
+        this.cdr.detectChanges();
+      },
+      error: () => {}
+    });
+  }
+
+  hasAccount(name: string): boolean {
+    return this.candidatesWithAccounts.has(name);
   }
 
   loadHiredCandidates() {
@@ -243,6 +261,7 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
             console.log('[CreateAccount] Employee record created:', empResponse);
             this.accountCreated[record.id]  = true;
             this.creatingAccount[record.id] = false;
+            this.candidatesWithAccounts.add(candidateName);
             this.showToast(
               `Account created! Login: ${accountResponse.email ?? accountResponse.Email} — Credentials sent to ${candidateEmail || 'employee'}`,
               'success'
@@ -253,6 +272,7 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
             console.error('[CreateAccount] HRMS employee record failed:', err);
             this.accountCreated[record.id]  = true;
             this.creatingAccount[record.id] = false;
+            this.candidatesWithAccounts.add(candidateName);
             this.showToast(
               `Account created (${accountResponse.email ?? accountResponse.Email}) — employee profile setup failed: ${err.error?.message || 'unknown error'}`,
               'warn'

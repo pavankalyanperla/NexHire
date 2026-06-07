@@ -45,7 +45,7 @@
           <p-button icon="pi pi-pencil" [text]="true" severity="info"
             (onClick)="openEdit(r)" pTooltip="Edit Checklist" styleClass="mr-1">
           </p-button>
-          <ng-container *ngIf="!accountCreated[r.id]; else accountDone">
+          <ng-container *ngIf="!hasAccount(r.candidateName) && !accountCreated[r.id]; else accountDone">
             <p-button icon="pi pi-user-plus" label="Create Account" size="small"
               severity="success"
               [loading]="creatingAccount[r.id]"
@@ -55,7 +55,7 @@
           </ng-container>
           <ng-template #accountDone>
             <span style="color:#16a34a;font-size:0.85rem">
-              <i class="pi pi-check-circle"></i> Account Created
+              <i class="pi pi-check-circle"></i> Account Active
             </span>
           </ng-template>
         </td>

@@ -20,8 +20,8 @@ export class EmployeeManagementComponent implements OnInit, AfterViewInit {
   toastSeverity: 'success' | 'error' = 'success';
   showToastFlag = false;
 
-  creatingAccount: {[id: number]: boolean} = {};
-  accountCreated:  {[id: number]: boolean} = {};
+  creatingAccount:       {[id: number]: boolean} = {};
+  employeesWithAccounts: Set<string>             = new Set();
   showCredentialsDialog = false;
   createdCredentials: any = null;
 
@@ -42,9 +42,25 @@ export class EmployeeManagementComponent implements OnInit, AfterViewInit {
         this.loading = false;
         this.dataLoaded = true;
         this.cdr.detectChanges();
+        this.checkExistingAccounts(e.map(emp => emp.fullName));
       },
       error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
+  }
+
+  checkExistingAccounts(names: string[]) {
+    if (names.length === 0) return;
+    this.http.post<any[]>(`${environment.apiUrl}/auth/check-accounts`, names).subscribe({
+      next: users => {
+        users.forEach(u => this.employeesWithAccounts.add(u.fullName));
+        this.cdr.detectChanges();
+      },
+      error: () => {}
+    });
+  }
+
+  hasAccount(name: string): boolean {
+    return this.employeesWithAccounts.has(name);
   }
 
   applyFilter() {
@@ -110,7 +126,7 @@ export class EmployeeManagementComponent implements OnInit, AfterViewInit {
       next: (res: any) => {
         setTimeout(() => {
           this.creatingAccount[employee.id] = false;
-          this.accountCreated[employee.id]  = true;
+          this.employeesWithAccounts.add(employee.fullName);
           this.createdCredentials = {
             name:     res.fullName,
             email:    res.email,
