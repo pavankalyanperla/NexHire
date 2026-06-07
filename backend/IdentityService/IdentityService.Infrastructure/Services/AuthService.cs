@@ -122,6 +122,37 @@ public class AuthService : IAuthService
         };
     }
 
+    public async Task<CreateEmployeeAccountResponseDto> CreateStaffAccountAsync(CreateStaffAccountDto dto)
+    {
+        var companyEmail = await GetUniqueCompanyEmail(dto.FullName);
+        var tempPassword = $"NexHire@{DateTime.UtcNow.Year}!" + Guid.NewGuid().ToString("N")[..4].ToUpper();
+
+        var user = new User
+        {
+            FullName     = dto.FullName,
+            Email        = companyEmail,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(tempPassword),
+            Role         = dto.Role,
+            Department   = dto.Department,
+            IsActive     = true,
+            CreatedAt    = DateTime.UtcNow
+        };
+
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        return new CreateEmployeeAccountResponseDto
+        {
+            UserId            = user.Id,
+            FullName          = user.FullName,
+            Email             = companyEmail,
+            PersonalEmail     = dto.PersonalEmail,
+            TemporaryPassword = tempPassword,
+            Role              = user.Role,
+            Message           = "Staff account created successfully"
+        };
+    }
+
     private string GenerateCompanyEmail(string fullName)
     {
         var parts = fullName.ToLower()

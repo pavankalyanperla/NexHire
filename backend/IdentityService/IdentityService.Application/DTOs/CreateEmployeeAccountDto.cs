@@ -30,3 +30,12 @@ public class UpdateUserRoleDto
     public string  Role       { get; set; } = string.Empty;
     public string? Department { get; set; }
 }
+
+public class CreateStaffAccountDto
+{
+    public string FullName      { get; set; } = string.Empty;
+    public string PersonalEmail { get; set; } = string.Empty;
+    public string Department    { get; set; } = string.Empty;
+    public string Designation   { get; set; } = string.Empty;
+    public string Role          { get; set; } = "Employee";
+}

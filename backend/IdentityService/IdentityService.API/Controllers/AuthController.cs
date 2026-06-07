@@ -109,6 +109,21 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Password changed successfully." });
     }
 
+    [HttpPost("create-staff-account")]
+    [Authorize(Roles = "ManagementAdmin")]
+    public async Task<IActionResult> CreateStaffAccount([FromBody] CreateStaffAccountDto dto)
+    {
+        try
+        {
+            var result = await _authService.CreateStaffAccountAsync(dto);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpGet("users")]
     [Authorize(Roles = "ManagementAdmin")]
     public async Task<IActionResult> GetAllUsers()
