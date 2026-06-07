@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { HrmsService } from '../../core/services/hrms.service';
 import { RecruitmentService } from '../../core/services/recruitment.service';
@@ -64,23 +64,43 @@ export class OnboardingComponent implements OnInit, AfterViewInit {
   }
 
   loadHiredCandidates() {
+    const onboardedEmails = new Set(
+      this.records
+        .map((o: any) => (o.candidateEmail || '').toLowerCase())
+        .filter(Boolean)
+    );
+
     this.recruitment.getJobPostings().subscribe({
       next: jobs => {
-        if (jobs.length === 0) { this.hiredCandidates = []; this.cdr.detectChanges(); return; }
-        const requests = jobs.map(job => this.recruitment.getApplicationsByJob(job.id));
-        forkJoin(requests).subscribe({
-          next: results => {
-            const all = (results as any[][]).flat();
-            const allHired = all.filter((a: any) => a.status === 'Hired');
-            // Exclude candidates who already have an onboarding record
-            const onboardedEmails = new Set(
-              this.records
-                .map((o: any) => (o.candidateEmail || '').toLowerCase())
-                .filter(Boolean)
-            );
-            this.hiredCandidates = allHired.filter(
-              (a: any) => !onboardedEmails.has((a.candidateEmail || '').toLowerCase())
-            );
+        const apps$ = jobs.length > 0
+          ? forkJoin(jobs.map((job: any) => this.recruitment.getApplicationsByJob(job.id)))
+          : of([] as any[][]);
+
+        forkJoin({ apps: apps$, employees: this.hrms.getEmployees() }).subscribe({
+          next: ({ apps, employees }) => {
+            const recruited = (apps as any[][])
+              .flat()
+              .filter((a: any) => a.status === 'Hired')
+              .filter((a: any) => !onboardedEmails.has((a.candidateEmail || '').toLowerCase()))
+              .map((a: any) => ({
+                candidateName:  a.candidateName,
+                candidateEmail: a.candidateEmail,
+                department:     a.department || 'Engineering',
+                designation:    a.jobTitle   || 'Employee',
+                source:         'recruitment'
+              }));
+
+            const manual = (employees as any[])
+              .filter((e: any) => !onboardedEmails.has((e.email || '').toLowerCase()))
+              .map((e: any) => ({
+                candidateName:  e.fullName,
+                candidateEmail: e.email,
+                department:     e.department,
+                designation:    e.designation,
+                source:         'manual'
+              }));
+
+            this.hiredCandidates = [...recruited, ...manual];
             this.cdr.detectChanges();
           },
           error: () => { this.hiredCandidates = []; this.cdr.detectChanges(); }

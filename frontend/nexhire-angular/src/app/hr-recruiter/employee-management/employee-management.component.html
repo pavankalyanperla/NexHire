@@ -29,8 +29,8 @@
         <td>{{ e.department }}</td>
         <td>{{ e.designation }}</td>
         <td><p-tag [value]="e.status" [severity]="e.status === 'Active' ? 'success' : 'danger'"></p-tag></td>
-        <td style="white-space:nowrap">
-          <p-button icon="pi pi-pencil" [text]="true" severity="info" (onClick)="openEdit(e)" styleClass="mr-1"
+        <td style="white-space:nowrap;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <p-button icon="pi pi-pencil" [text]="true" severity="info" (onClick)="openEdit(e)"
                     pTooltip="Edit"></p-button>
           <p-button
             [label]="e.status === 'Active' ? 'Deactivate' : 'Activate'"
@@ -38,6 +38,20 @@
             size="small"
             (onClick)="toggleStatus(e)">
           </p-button>
+          <ng-container *ngIf="!accountCreated[e.id]">
+            <p-button
+              icon="pi pi-key"
+              label="Create Login"
+              severity="success"
+              size="small"
+              [loading]="creatingAccount[e.id]"
+              (onClick)="createEmployeeAccount(e)"
+              pTooltip="Create login credentials and send welcome email">
+            </p-button>
+          </ng-container>
+          <span *ngIf="accountCreated[e.id]" style="color:#16a34a;font-size:12px;white-space:nowrap">
+            <i class="pi pi-check"></i> Account Created
+          </span>
         </td>
       </tr>
     </ng-template>
@@ -61,3 +75,34 @@
     </ng-template>
   </p-dialog>
 </div>
+
+<p-dialog header="Account Created Successfully"
+          [(visible)]="showCredentialsDialog"
+          [style]="{width:'420px'}"
+          [modal]="true">
+  <div *ngIf="createdCredentials" style="display:flex;flex-direction:column;gap:12px;padding:4px 0">
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb">
+      <span style="font-weight:600;color:#374151">Name</span>
+      <span>{{createdCredentials.name}}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb">
+      <span style="font-weight:600;color:#374151">Role</span>
+      <span>{{createdCredentials.role}}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb">
+      <span style="font-weight:600;color:#374151">Login Email</span>
+      <span style="font-family:monospace">{{createdCredentials.email}}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb">
+      <span style="font-weight:600;color:#374151">Temp Password</span>
+      <span style="font-family:monospace">{{createdCredentials.password}}</span>
+    </div>
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:10px 14px;font-size:13px;color:#1d4ed8;margin-top:4px">
+      <i class="pi pi-info-circle" style="margin-right:6px"></i>
+      Welcome email sent to employee's personal email. They should change their password on first login.
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Close" severity="secondary" (onClick)="showCredentialsDialog=false"></p-button>
+  </ng-template>
+</p-dialog>

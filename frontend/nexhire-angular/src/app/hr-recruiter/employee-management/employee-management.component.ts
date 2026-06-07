@@ -1,6 +1,8 @@
 import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { HrmsService } from '../../core/services/hrms.service';
 import { EmployeeDto, CreateEmployeeDto, UpdateEmployeeDto } from '../../core/models/hrms.model';
+import { environment } from '../../../environments/environment';
 
 @Component({ selector: 'app-employee-management', templateUrl: './employee-management.component.html', standalone: false })
 export class EmployeeManagementComponent implements OnInit, AfterViewInit {
@@ -18,7 +20,12 @@ export class EmployeeManagementComponent implements OnInit, AfterViewInit {
   toastSeverity: 'success' | 'error' = 'success';
   showToastFlag = false;
 
-  constructor(private hrms: HrmsService, private cdr: ChangeDetectorRef) {}
+  creatingAccount: {[id: number]: boolean} = {};
+  accountCreated:  {[id: number]: boolean} = {};
+  showCredentialsDialog = false;
+  createdCredentials: any = null;
+
+  constructor(private hrms: HrmsService, private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() { this.load(); }
 
@@ -82,6 +89,36 @@ export class EmployeeManagementComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
       },
       error: () => this.showToast('Failed to update status', 'error')
+    });
+  }
+
+  createEmployeeAccount(employee: any) {
+    this.creatingAccount[employee.id] = true;
+    const payload = {
+      fullName:      employee.fullName,
+      personalEmail: employee.email,
+      department:    employee.department,
+      designation:   employee.designation,
+      role:          employee.role || 'Employee'
+    };
+    this.http.post(`${environment.apiUrl}/auth/create-staff-account`, payload).subscribe({
+      next: (res: any) => {
+        this.creatingAccount[employee.id] = false;
+        this.accountCreated[employee.id]  = true;
+        this.createdCredentials = {
+          name:     res.fullName,
+          email:    res.email,
+          password: res.temporaryPassword,
+          role:     res.role
+        };
+        this.showCredentialsDialog = true;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.creatingAccount[employee.id] = false;
+        this.showToast(err.error?.message || 'Failed to create account', 'error');
+        this.cdr.detectChanges();
+      }
     });
   }
 
